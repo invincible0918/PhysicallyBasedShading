@@ -36,13 +36,14 @@ VertexOutputForward vertForward(VertexInput v)
 
 float3 BRDF(float3 albedo,
     float3 specColor, 
-    float oneMinusReflectivity, 
-    float roughness,
+    float perceptualRoughness,
+    float metallic,
     float3 normal, 
     float3 viewDir,
     float3 lightDir)
 {
-    float perceptualRoughness = roughness;
+    float roughness = perceptualRoughness * perceptualRoughness;
+    roughness = max(roughness, 0.002);
     float3 h = normalize(lightDir + viewDir);
 
     float nv = abs(dot(normal, viewDir));    // This abs allow to limit artifact
@@ -53,58 +54,18 @@ float3 BRDF(float3 albedo,
     float lv = saturate(dot(lightDir, viewDir));
     float lh = saturate(dot(lightDir, h));
 
-    float3 brdf = DirectLightDiffuse(albedo, nl) + DirectLightSpecular() + IndirectLightDiffuse() + IndirectLightSpecular();
+    float vh = saturate(dot(viewDir, h));
+
+    float3 directLightDiffuse = 0;// DirectLightDiffuse(albedo, perceptualRoughness, nv, nl, lh);
+    float3 directLightSpecular = DirectLightSpecular(albedo, metallic, roughness, nv, nl, nh, vh);
+    float3 indirectLightDiffuse = IndirectLightDiffuse();
+    float3 indirectLightSpecular = IndirectLightSpecular();
+
+    float3 directLight = (directLightDiffuse + directLightSpecular) * _DirectionalLightColor * nl;
+
+    float3 brdf = directLightDiffuse + directLightSpecular + indirectLightDiffuse + indirectLightSpecular;
 
     return brdf;
-
-//    // Diffuse term
-//    float diffuseTerm = DisneyDiffuse(nv, nl, lh, perceptualRoughness) * nl;
-//
-//    // Specular term
-//    // HACK: theoretically we should divide diffuseTerm by Pi and not multiply specularTerm!
-//    // BUT 1) that will make shader look significantly darker than Legacy ones
-//    // and 2) on engine side "Non-important" lights have to be divided by Pi too in cases when they are injected into ambient SH
-//    float roughness = PerceptualRoughnessToRoughness(perceptualRoughness);
-//#if UNITY_BRDF_GGX
-//    // GGX with roughtness to 0 would mean no specular at all, using max(roughness, 0.002) here to match HDrenderloop roughtness remapping.
-//    roughness = max(roughness, 0.002);
-//    float V = SmithJointGGXVisibilityTerm(nl, nv, roughness);
-//    float D = GGXTerm(nh, roughness);
-//#else
-//    // Legacy
-//    float V = SmithBeckmannVisibilityTerm(nl, nv, roughness);
-//    float D = NDFBlinnPhongNormalizedTerm(nh, PerceptualRoughnessToSpecPower(perceptualRoughness));
-//#endif
-//
-//    float specularTerm = V * D * UNITY_PI; // Torrance-Sparrow model, Fresnel is applied later
-//
-//#   ifdef UNITY_COLORSPACE_GAMMA
-//    specularTerm = sqrt(max(1e-4h, specularTerm));
-//#   endif
-//
-//    // specularTerm * nl can be NaN on Metal in some cases, use max() to make sure it's a sane value
-//    specularTerm = max(0, specularTerm * nl);
-//#if defined(_SPECULARHIGHLIGHTS_OFF)
-//    specularTerm = 0.0;
-//#endif
-//
-//    // surfaceReduction = Int D(NdotH) * NdotH * Id(NdotL>0) dH = 1/(roughness^2+1)
-//    float surfaceReduction;
-//#   ifdef UNITY_COLORSPACE_GAMMA
-//    surfaceReduction = 1.0 - 0.28 * roughness * perceptualRoughness;      // 1-0.28*x^3 as approximation for (1/(x^4+1))^(1/2.2) on the domain [0;1]
-//#   else
-//    surfaceReduction = 1.0 / (roughness * roughness + 1.0);           // fade \in [0.5;1]
-//#   endif
-//
-//    // To provide true Lambert lighting, we need to be able to kill specular completely.
-//    specularTerm *= any(specColor) ? 1.0 : 0.0;
-//
-//    float grazingTerm = saturate(smoothness + (1 - oneMinusReflectivity));
-//    float3 color = diffColor * (gi.diffuse + light.color * diffuseTerm)
-//        + specularTerm * light.color * FresnelTerm(specColor, lh)
-//        + surfaceReduction * gi.specular * FresnelLerp(specColor, grazingTerm, nv);
-//
-//    return float4(color, 1);
 }
 
 float3 GetNormal(float2 uv, float4 tangentToWorld[3])
@@ -127,8 +88,7 @@ float4 fragForward(VertexOutputForward i) : SV_Target
 {
     float3 albedo = tex2D(_MainTex, i.tex).rgb;
     float metallic = tex2D(_MetallicTex, i.tex).r;
-    float roughness = tex2D(_RoughnessTex, i.tex).r;
-
+    float perceptualRoughness = tex2D(_RoughnessTex, i.tex).r;
     float3 specColor = lerp(LinearColorSpaceDielectricSpec.rgb, albedo, metallic);
     float oneMinusReflectivity = LinearColorSpaceDielectricSpec.a - metallic * LinearColorSpaceDielectricSpec.a;
     float3 diffColor = albedo * oneMinusReflectivity;
@@ -137,7 +97,7 @@ float4 fragForward(VertexOutputForward i) : SV_Target
     float3 posWorld = float3(i.tangentToWorldAndPackedData[0].w, i.tangentToWorldAndPackedData[1].w, i.tangentToWorldAndPackedData[2].w);
 
     float4 finalColor = 0;
-    finalColor.rgb = BRDF(albedo, specColor, oneMinusReflectivity, roughness, normalWorld, -eyeVec, -_DirectionalLightWorldSpace);
+    finalColor.rgb = BRDF(albedo, specColor, perceptualRoughness, metallic, normalWorld, -eyeVec, -_DirectionalLightWorldSpace);
     finalColor.a = 1;
     return finalColor;
     //FRAGMENT_SETUP(s)

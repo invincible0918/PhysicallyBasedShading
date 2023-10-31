@@ -12,6 +12,7 @@ sampler2D _MetallicTex;
 sampler2D _RoughnessTex;
 
 #define LinearColorSpaceDielectricSpec half4(0.04, 0.04, 0.04, 1.0 - 0.04) // standard dielectric reflectivity coef at incident angle (= 4%)
+#define PI 3.14159265359f
 
 struct VertexInput
 {
