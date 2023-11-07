@@ -61,17 +61,9 @@ float3 DirectLightSpecular(float3 albedo, float metallic, float roughness, float
 	// https://github.com/EpicGames/UnrealEngine/blob/5ccd1d8b91c944d275d04395a037636837de2c56/Engine/Shaders/Private/BRDF.ush
     float D = TrowbridgeReitzGGX(nh, roughness);
     float G = SmithJointApprox(nv, nl, roughness);
-    //float3 F0 = lerp(unity_ColorSpaceDielectricSpec.rgb, albedo, _Metallic);
     float3 F = Fresnel(albedo, metallic, vh);
 
-    //float3 dgf = D * G * F;
-    //// Cook - torrance BRDF
-    ////float3 result = dgf / (4 * nv * nl) * nl * _LightColor0 .rgb;
-
-    //// Unity
-    //float3 result = dgf /*/ (4 * nv * nl)*/ * nl * _LightColor0.rgb * UNITY_PI;
-
-	return F;
+	return D * G * F / 4 * nv * nl;
 }
 //// DirectLightSpecular End
 

@@ -46,7 +46,7 @@ float3 BRDF(float3 albedo,
     roughness = max(roughness, 0.002);
     float3 h = normalize(lightDir + viewDir);
 
-    float nv = abs(dot(normal, viewDir));    // This abs allow to limit artifact
+    float nv = saturate(dot(normal, viewDir)); 
 
     float nl = saturate(dot(normal, lightDir));
     float nh = saturate(dot(normal, h));
@@ -56,14 +56,14 @@ float3 BRDF(float3 albedo,
 
     float vh = saturate(dot(viewDir, h));
 
-    float3 directLightDiffuse = 0;// DirectLightDiffuse(albedo, perceptualRoughness, nv, nl, lh);
+    float3 directLightDiffuse = DirectLightDiffuse(albedo, perceptualRoughness, nv, nl, lh);
     float3 directLightSpecular = DirectLightSpecular(albedo, metallic, roughness, nv, nl, nh, vh);
     float3 indirectLightDiffuse = IndirectLightDiffuse();
     float3 indirectLightSpecular = IndirectLightSpecular();
 
     float3 directLight = (directLightDiffuse + directLightSpecular) * _DirectionalLightColor * nl;
 
-    float3 brdf = directLightDiffuse + directLightSpecular + indirectLightDiffuse + indirectLightSpecular;
+    float3 brdf = directLight + indirectLightDiffuse + indirectLightSpecular;
 
     return brdf;
 }
@@ -99,6 +99,7 @@ float4 fragForward(VertexOutputForward i) : SV_Target
     float4 finalColor = 0;
     finalColor.rgb = BRDF(albedo, specColor, perceptualRoughness, metallic, normalWorld, -eyeVec, -_DirectionalLightWorldSpace);
     finalColor.a = 1;
+
     return finalColor;
     //FRAGMENT_SETUP(s)
 

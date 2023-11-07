@@ -3,10 +3,12 @@ Shader "Custom/LitPBR"
 	Properties
 	{
 		_MainTex("Albedo", 2D) = "white" {}
-		_MetallicMap("Metallic", 2D) = "white" {}
-		_RoughnessMap("Roughness", 2D) = "white" {}
+		_MetallicTex("Metallic", 2D) = "white" {}
+		_RoughnessTex("Roughness", 2D) = "white" {}
 
 		_NormalTex("Normal", 2D) = "bump" {}
+
+		_Cube ("Reflection Cubemap", Cube) = "_Skybox" { }
 
 		_OcclusionStrength("Strength", Range(0.0, 1.0)) = 1.0
 		_OcclusionMap("Occlusion", 2D) = "white" {}
