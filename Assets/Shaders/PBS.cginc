@@ -18,7 +18,6 @@ float3 DisneyDiffuse(float3 albedo, half nv, half nl, half lh, half perceptualRo
 	return albedo / PI * lightScatter * viewScatter;
 }
 
-
 float3 DirectLightDiffuse(float3 albedo, float nv, float nl, float lh, float perceptualRoughness)
 {
 	float kd = 1;
