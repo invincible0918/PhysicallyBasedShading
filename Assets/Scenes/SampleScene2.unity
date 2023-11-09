@@ -555,7 +555,13 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: daca4c365bfb59840ba94c890e895b8f, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  sampleSize: 512
+  threadCount: 8
+  shcCount: 9
+  computeShader: {fileID: 7200000, guid: a7fd9095245f08941b6d21ef9bf321ed, type: 3}
   directionalLight: {fileID: 1872202802}
+  cubemap: {fileID: 0}
+  sh9: []
 --- !u!81 &1891705399
 AudioListener:
   m_ObjectHideFlags: 0

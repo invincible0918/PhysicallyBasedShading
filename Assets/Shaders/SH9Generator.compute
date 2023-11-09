@@ -1,0 +1,18 @@
+// Spherical harmonic illumination parameters are extracted from CubeMap 
+// By using spherical uniform sampling
+
+#pragma kernel CSMain
+
+#define SH_DEGREE 3
+
+TextureCube<float4> _CubeMap;
+uint2 _SampleSize;
+RWStructuredBuffer<float4> _ShcBuffer;
+
+[numthreads(8, 8, 1)]
+void CSMain (uint3 groupID : SV_GroupID, uint3 id : SV_DispatchThreadID, uint groupIndex : SV_GroupIndex)
+{
+    // TODO: insert actual code here!
+
+    _ShcBuffer[id.x] = float4(id.x & id.y, (id.x & 15)/15.0, (id.y & 15)/15.0, 0.0);
+}
