@@ -110,7 +110,6 @@
 				v = normalize(v);
 				float4 original = tex2D(_MainTex, i.texcoord);
 				float4 approx = c0 * Y0(v) + c1 * Y1(v) + c2 * Y2(v) + c3 * Y3(v) + c4 * Y4(v) + c5 * Y5(v) + c6 * Y6(v) + c7 * Y7(v) + c8 * Y8(v);
-				approx = c5;
 				approx.a = 1.0;
 				//approx.a = 1.0;
 				
