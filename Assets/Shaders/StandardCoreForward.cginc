@@ -57,7 +57,7 @@ float3 BRDF(float3 albedo,
     float vh = saturate(dot(viewDir, h));
 
     float3 directLightDiffuse = DirectLightDiffuse(albedo, perceptualRoughness, nv, nl, lh);
-    float3 directLightSpecular = DirectLightSpecular(albedo, metallic, roughness, nv, nl, nh, vh);
+    float3 directLightSpecular = 0;// DirectLightSpecular(albedo, metallic, roughness, nv, nl, nh, vh);
     float3 indirectLightDiffuse = IndirectLightDiffuse();
     float3 indirectLightSpecular = IndirectLightSpecular();
 
@@ -88,7 +88,7 @@ float4 fragForward(VertexOutputForward i) : SV_Target
 {
     float3 albedo = tex2D(_MainTex, i.tex).rgb;
     float metallic = tex2D(_MetallicTex, i.tex).r;
-    float perceptualRoughness = tex2D(_RoughnessTex, i.tex).r;
+    float perceptualRoughness = tex2D(_RoughnessTex, i.tex).r/* * _RoughnessScale*/;
     float3 specColor = lerp(LinearColorSpaceDielectricSpec.rgb, albedo, metallic);
     float oneMinusReflectivity = LinearColorSpaceDielectricSpec.a - metallic * LinearColorSpaceDielectricSpec.a;
     float3 diffColor = albedo * oneMinusReflectivity;

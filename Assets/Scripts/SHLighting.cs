@@ -59,6 +59,7 @@ public class SHLighting : MonoBehaviour
         var mat = mr.material;
         for (int i = 0; i < n; ++i) {
             mat.SetVector("c" + i.ToString(), coefs[i]);
+            Debug.Log(coefs[i]);
         }
     }
 

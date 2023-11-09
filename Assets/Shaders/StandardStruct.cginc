@@ -5,6 +5,7 @@ float4x4 _ViewToProjection;
 float3 _CameraWorldSpace;
 float3 _DirectionalLightWorldSpace;
 float3 _DirectionalLightColor;
+float _RoughnessScale;
 
 sampler2D _MainTex;
 sampler2D _NormalTex;
