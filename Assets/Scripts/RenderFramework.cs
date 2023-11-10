@@ -2,28 +2,35 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.Rendering;
+using UnityEngine.Experimental.Rendering;
 
 public class RenderFramework : MonoBehaviour
 {
-    [SerializeField]
-    int sampleSize = 512;
-    [SerializeField]
-    int threadCount = 8;
+    [Header("SH9")]
 
     [SerializeField]
-    int shcCount = 9;
-
+    ComputeShader sh9GeneratorCS;
     [SerializeField]
-    ComputeShader computeShader;
-
-    [SerializeField]
-    Light directionalLight;
+    ComputeShader sh9ReconstructorCS;
 
     [SerializeField]
     Cubemap cubemap;
+    [SerializeField]
+    RenderTexture sh9Cubemap;
 
     [SerializeField]
     List<Vector4> sh9;
+
+    [SerializeField]
+    int sampleSize = 512;
+
+    const int threadCount = 8;
+    const int shcCount = 9;
+
+    [Header("Scene Setup")]
+
+    [SerializeField]
+    Light directionalLight;
 
     Camera cam;
 
@@ -34,11 +41,11 @@ public class RenderFramework : MonoBehaviour
         InitCubemap();
     }
 
-    void OnEnable()
-    {
-        InitCamera();
-        InitCubemap();
-    }
+    //void OnEnable()
+    //{
+    //    InitCamera();
+    //    InitCubemap();
+    //}
 
     // Update is called once per frame
     void Update()
@@ -57,22 +64,29 @@ public class RenderFramework : MonoBehaviour
 
     void InitCubemap()
     {
-        FromCubeMapAsync(cubemap, _sh9 => 
+        Sh9GeneratorAsync(cubemap, _sh9 => 
         {
             sh9 = new List<Vector4>(_sh9);
             Shader.SetGlobalVectorArray("_SH9", sh9);
+
+            // display low frequency cubemap
+            Sh9ReconstructorAsync(_sh9, _rt => 
+            {
+                sh9Cubemap = _rt;
+                Debug.Log("Sh9 ReconstructorAsync is done!");
+            });
         });
     }
 
-    public AsyncGPUReadbackRequest FromCubeMapAsync(Cubemap cubemap, System.Action<Vector4[]> callback)
+    public AsyncGPUReadbackRequest Sh9GeneratorAsync(Cubemap cubemap, System.Action<Vector4[]> callback)
     {
         int groupCount = sampleSize / threadCount;
         ComputeBuffer shcBuffer = new ComputeBuffer(groupCount * groupCount * shcCount, 16);
-        computeShader.SetTexture(0, "_CubeMap", cubemap);
-        computeShader.SetBuffer(0, "_ShcBuffer", shcBuffer);
-        computeShader.SetInts("_SampleSize", sampleSize, sampleSize);
-        computeShader.Dispatch(0, groupCount, groupCount, 1);
-        return AsyncGPUReadback.Request(shcBuffer, (req) => 
+        sh9GeneratorCS.SetTexture(0, "_Cubemap", cubemap);
+        sh9GeneratorCS.SetBuffer(0, "_ShcBuffer", shcBuffer);
+        sh9GeneratorCS.SetInts("_SampleSize", sampleSize, sampleSize);
+        sh9GeneratorCS.Dispatch(0, groupCount, groupCount, 1);
+        return AsyncGPUReadback.Request(shcBuffer, req => 
         {
             if (req.hasError)
             {
@@ -94,6 +108,29 @@ public class RenderFramework : MonoBehaviour
             }
             shcBuffer.Release();
             callback(shcs);
+        });
+    }
+
+    AsyncGPUReadbackRequest Sh9ReconstructorAsync(Vector4[] sh9, System.Action<RenderTexture> callback)
+    {
+        // sRGB color space
+        RenderTexture rt = new RenderTexture(sampleSize * 4, sampleSize * 3, 0, RenderTextureFormat.ARGB32);
+        rt.enableRandomWrite = true;
+        rt.Create();
+
+        int groupCount = sampleSize / threadCount;
+
+        sh9ReconstructorCS.SetVectorArray("_SH9", sh9);
+        sh9ReconstructorCS.SetTexture(0, "_Cubemap", rt);
+        sh9ReconstructorCS.SetInt("_FaceSize", sampleSize);
+        sh9ReconstructorCS.Dispatch(0, groupCount, groupCount, 6);
+        return AsyncGPUReadback.Request(rt, 0, 0, rt.width, 0, rt.height, 0, 1, res => 
+        {
+            if (res.hasError)
+            {
+                Debug.LogError("sh9 reconstruct with gpu error");
+            }
+            callback(rt);
         });
     }
 }

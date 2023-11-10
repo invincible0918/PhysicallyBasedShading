@@ -555,13 +555,13 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: daca4c365bfb59840ba94c890e895b8f, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  sampleSize: 512
-  threadCount: 8
-  shcCount: 9
-  computeShader: {fileID: 7200000, guid: a7fd9095245f08941b6d21ef9bf321ed, type: 3}
-  directionalLight: {fileID: 1872202802}
-  cubemap: {fileID: 0}
+  sh9GeneratorCS: {fileID: 7200000, guid: a7fd9095245f08941b6d21ef9bf321ed, type: 3}
+  sh9ReconstructorCS: {fileID: 7200000, guid: 5e4067e4b1d5baf488b8138e7cac8d4d, type: 3}
+  cubemap: {fileID: 8900000, guid: bc088303f7e866e479005b664db7579f, type: 3}
+  sh9Cubemap: {fileID: 0}
   sh9: []
+  sampleSize: 512
+  directionalLight: {fileID: 1872202802}
 --- !u!81 &1891705399
 AudioListener:
   m_ObjectHideFlags: 0
