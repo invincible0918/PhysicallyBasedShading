@@ -47,7 +47,8 @@ float3 LocalSpaceDirection(float theta, float phi)
     sincos(theta, sTheta, cTheta);
     sincos(phi, sPhi, cPhi);
 
-    float3 localSpaceDir = float3(cPhi * sTheta, sPhi * sTheta, cTheta);
+    //float3 localSpaceDir = float3(cPhi * sTheta, sPhi * sTheta, cTheta);
+    float3 localSpaceDir = float3(sTheta * cPhi, cTheta, sTheta * sPhi);
 
     //float3 result;
     //result.y = c_theta;

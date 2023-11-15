@@ -12,6 +12,7 @@ SamplerState Sampler_PointClamp;
 
 uniform float4 _SH9[9];
 uniform uint _FaceSize;
+uniform float4 colors[10000];
 
 static half3 faceBasis[18] = 
 {
@@ -77,7 +78,7 @@ void CSMain(uint3 id : SV_DispatchThreadID)
         _SH9[7] * GetY2p1(p) +
         _SH9[8] * GetY2p2(p);
     uint2 uvOffset = uvOffsets[faceIndex] * _FaceSize;
-    //color.rgb = 1;// pow(clamp(color.rgb, 0, 1), 0.45);
+    color.rgb = pow(clamp(color.rgb, 0, 1), 0.45);
     color.a = 1;
     _Cubemap[id.xy + uvOffset] = color; //convert to gamma space
 }

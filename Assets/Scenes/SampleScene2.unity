@@ -38,7 +38,7 @@ RenderSettings:
   m_ReflectionIntensity: 1
   m_CustomReflection: {fileID: 0}
   m_Sun: {fileID: 0}
-  m_IndirectSpecularColor: {r: 0.80451596, g: 0.8075887, b: 0.83542657, a: 1}
+  m_IndirectSpecularColor: {r: 0.6555997, g: 0.49169978, b: 0.6555997, a: 1}
   m_UseRadianceAmbientProbe: 0
 --- !u!157 &3
 LightmapSettings:
@@ -557,7 +557,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   sh9GeneratorCS: {fileID: 7200000, guid: a7fd9095245f08941b6d21ef9bf321ed, type: 3}
   sh9ReconstructorCS: {fileID: 7200000, guid: 5e4067e4b1d5baf488b8138e7cac8d4d, type: 3}
-  cubemap: {fileID: 8900000, guid: bc088303f7e866e479005b664db7579f, type: 3}
+  cubemap: {fileID: 8900000, guid: 3739f88bd4303eb48ba9677caadf8603, type: 2}
   sh9Cubemap: {fileID: 0}
   sh9: []
   sampleSize: 512

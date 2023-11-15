@@ -56,7 +56,7 @@ void CSMain (uint3 groupID : SV_GroupID, uint3 id : SV_DispatchThreadID, uint gr
     // uniform sampling
     float theta, phi;
     //UniformSampling(/*out */theta, /*out */phi);
-    theta = acos(1 - id.x / (_SampleSize.x - 1));
+    theta = acos(1 - id.x * 2.0 / (_SampleSize.x - 1));
     phi = 2 * PI * (id.y / (_SampleSize.y - 1));
 
     CalculateSH9(theta, phi, groupIndex);
