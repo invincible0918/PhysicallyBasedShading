@@ -67,10 +67,31 @@ float3 DirectLightSpecular(float3 albedo, float metallic, float roughness, float
 }
 //// DirectLightSpecular End
 
-float3 IndirectLightDiffuse()
+//// IndirectLightDiffuse Start
+uniform float4 _SH9[9];
+
+half4 SH9(float3 dir)
 {
-	return 0;
+    float3 d = float3(dir.x,dir.z,dir.y);
+    float4 color = 
+    _SH9[0] * GetY00(d) + 
+    _SH9[1] * GetY1n1(d) + 
+    _SH9[2] * GetY10(d) + 
+    _SH9[3] * GetY1p1(d) + 
+    _SH9[4] * GetY2n2(d) + 
+    _SH9[5] * GetY2n1(d) + 
+    _SH9[6] * GetY20(d) + 
+    _SH9[7] * GetY2p1(d) + 
+    _SH9[8] * GetY2p2(d);
+    return color;
 }
+float3 IndirectLightDiffuse(float3 normal)
+{
+	half3 sh9Color = SH9(float4(normal, 1));
+
+	return sh9Color;
+}
+//// IndirectLightDiffuse End
 
 float3 IndirectLightSpecular()
 {

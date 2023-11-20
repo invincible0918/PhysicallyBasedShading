@@ -17,6 +17,8 @@ public class RenderFramework : MonoBehaviour
     [SerializeField]
     Cubemap cubemap;
     [SerializeField]
+    GraphicsFormat format;
+    [SerializeField]
     RenderTexture sh9Cubemap;
 
     [SerializeField]
@@ -37,17 +39,12 @@ public class RenderFramework : MonoBehaviour
 
     Camera cam;
 
-    //List<Vector3> debugPoints;
-    List<Color> debugColors;
-    [SerializeField]
-    RenderTexture debugCubemap;
-
     // Start is called before the first frame update
     void Start()
     {
         InitCamera();
-        //InitCubemap();
-        InitSphericalHarmonic();
+        InitCubemap();
+        //InitSphericalHarmonic();
     }
 
     //void OnEnable()
@@ -59,11 +56,7 @@ public class RenderFramework : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
-        Matrix4x4 projectionMatrix = GL.GetGPUProjectionMatrix(cam.projectionMatrix, true);
-        Shader.SetGlobalMatrix("_ViewToProjection", projectionMatrix * cam.worldToCameraMatrix);
-        Shader.SetGlobalVector("_CameraWorldSpace", cam.transform.position);
-        Shader.SetGlobalVector("_DirectionalLightWorldSpace", directionalLight.transform.forward);
-        Shader.SetGlobalVector("_DirectionalLightColor", directionalLight.color * directionalLight.intensity);
+        UpdateCamera();
     }
 
     void InitCamera()
@@ -73,10 +66,15 @@ public class RenderFramework : MonoBehaviour
 
     void InitCubemap()
     {
+        // https://docs.unity3d.com/ScriptReference/Experimental.Rendering.GraphicsFormat.html
+        // R16G16B16A16_SFloat: A four-component, 64-bit signed floating-point format that has a 16-bit R component in bytes 0..1, a 16-bit G component in bytes 2..3, a 16-bit B component in bytes 4..5, and a 16-bit A component in bytes 6..7.
+
+        format = cubemap.graphicsFormat;
+
         Sh9GeneratorAsync(cubemap, _sh9 => 
         {
             sh9 = new List<Vector4>(_sh9);
-            Shader.SetGlobalVectorArray("_SH9", sh9);
+            UpdateShader();
 
             // display low frequency cubemap
             Sh9ReconstructorAsync(_sh9, _rt => 
@@ -123,7 +121,10 @@ public class RenderFramework : MonoBehaviour
     AsyncGPUReadbackRequest Sh9ReconstructorAsync(Vector4[] sh9, System.Action<RenderTexture> callback)
     {
         // sRGB color space
-        RenderTexture rt = new RenderTexture(sampleSize * 4, sampleSize * 3, 0, RenderTextureFormat.ARGB32);
+        var rtDes = new RenderTextureDescriptor(sampleSize * 4, sampleSize * 3, GraphicsFormat.R16G16B16A16_SFloat, 0);
+        rtDes.sRGB = true;
+        rtDes.enableRandomWrite = true;
+        RenderTexture rt = new RenderTexture(rtDes);
         rt.enableRandomWrite = true;
         rt.Create();
 
@@ -132,7 +133,6 @@ public class RenderFramework : MonoBehaviour
         sh9ReconstructorCS.SetVectorArray("_SH9", sh9);
         sh9ReconstructorCS.SetTexture(0, "_Cubemap", rt);
         sh9ReconstructorCS.SetInt("_FaceSize", sampleSize);
-        sh9ReconstructorCS.SetVectorArray("colors", (from color in debugColors select new Vector4(color.r, color.g, color.b, color.a)).ToArray());
         sh9ReconstructorCS.Dispatch(0, groupCount, groupCount, 6);
         return AsyncGPUReadback.Request(rt, 0, 0, rt.width, 0, rt.height, 0, 1, res => 
         {
@@ -147,8 +147,6 @@ public class RenderFramework : MonoBehaviour
     void InitSphericalHarmonic()
     {
         Vector4[] coefs = new Vector4[sh9Count];
-        //debugPoints = new List<Vector3>();
-        debugColors = new List<Color>();
 
         int sampleNum = 10000;
         faceCalculate.Add(0, 0);
@@ -166,8 +164,6 @@ public class RenderFramework : MonoBehaviour
             {
                 coefs[t] = coefs[t] + h[t] * c;
             }
-            //debugPoints.Add(p);
-            debugColors.Add(c);
         }
         for (int t = 0; t < sh9Count; t++)
         {
@@ -181,12 +177,6 @@ public class RenderFramework : MonoBehaviour
             sh9Cubemap = _rt;
             Debug.Log("Sh9 ReconstructorAsync is done!");
         });
-
-        debugCubemap = new RenderTexture(sampleSize * 4, sampleSize * 3, 0, RenderTextureFormat.ARGB32);
-        debugCubemap.enableRandomWrite = true;
-        debugCubemap.Create();
-
-        debugCubemap.
     }
 
     Vector3 RandomCubePos()
@@ -270,4 +260,19 @@ public class RenderFramework : MonoBehaviour
     //        Gizmos.DrawWireSphere(point, 0.01f);
     //    }
     //}
+
+    void UpdateCamera()
+    {
+        Matrix4x4 projectionMatrix = GL.GetGPUProjectionMatrix(cam.projectionMatrix, true);
+        Shader.SetGlobalMatrix("_ViewToProjection", projectionMatrix * cam.worldToCameraMatrix);
+        Shader.SetGlobalVector("_CameraWorldSpace", cam.transform.position);
+        Shader.SetGlobalVector("_DirectionalLightWorldSpace", directionalLight.transform.forward);
+        Shader.SetGlobalVector("_DirectionalLightColor", directionalLight.color * directionalLight.intensity);
+    }
+
+    void UpdateShader()
+    {
+        if (sh9 != null && sh9.Count != 0)
+            Shader.SetGlobalVectorArray("_SH9", sh9);
+    }
 }

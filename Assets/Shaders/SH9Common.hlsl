@@ -1,7 +1,7 @@
 #ifndef _SH9_COMMON_
 #define _SH9_COMMON_
 
-static const float PI = 3.14159265f;
+#define PI 3.1415926
 static float RCP_PI = rcp(PI);
 
 // Spherical harmonics of order 3 in cartesian coordinates

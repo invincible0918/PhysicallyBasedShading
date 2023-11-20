@@ -34,6 +34,8 @@ Shader "Custom/LitPBR"
 			CGPROGRAM
 			#pragma vertex vertForward
 			#pragma fragment fragForward
+
+			#include "SH9Common.hlsl"
 			#include "StandardCoreForward.cginc"
 
 			ENDCG

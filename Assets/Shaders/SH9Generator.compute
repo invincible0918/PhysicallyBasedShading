@@ -15,7 +15,6 @@ static uint ShcCount = SH_DEGREE * SH_DEGREE;
 TextureCube<float4> _Cubemap;
 //SamplerState Sampler_LinearClamp;
 SamplerState Sampler_PointClamp;
-
 uint2 _SampleSize;
 
 // Each ThreadGroup will save the sum result in buffer in the bias position
@@ -30,7 +29,9 @@ groupshared float4 ShcGroup[THREAD_X * THREAD_Y * SH_DEGREE * SH_DEGREE];
 void CalculateSH9(float theta, float phi, uint groupIndex)
 {
     float3 localSpaceDir = LocalSpaceDirection(theta, phi);
-    float4 color = _Cubemap.SampleLevel(Sampler_PointClamp, localSpaceDir, 0);
+    float4 rgbm = _Cubemap.SampleLevel(Sampler_PointClamp, localSpaceDir, 1);
+    float4 color = pow(rgbm.rgba, 1/ 2.2);
+    color.a = 1;
 
     uint N = _SampleSize.x * _SampleSize.y;
     float A = 4 * PI / N;
@@ -50,14 +51,14 @@ void CalculateSH9(float theta, float phi, uint groupIndex)
 [numthreads(THREAD_X, THREAD_Y, 1)]
 void CSMain (uint3 groupID : SV_GroupID, uint3 id : SV_DispatchThreadID, uint groupIndex : SV_GroupIndex)
 {
-    //_pixel = id.xy;
-    //SetSeed();
+    ////_pixel = id.xy;
+    ////SetSeed();
 
-    // uniform sampling
+    //// uniform sampling
     float theta, phi;
     //UniformSampling(/*out */theta, /*out */phi);
     theta = acos(1 - id.x * 2.0 / (_SampleSize.x - 1));
-    phi = 2 * PI * (id.y / (_SampleSize.y - 1));
+    phi = 2 * PI * (id.y * 1.0 / (_SampleSize.y - 1));
 
     CalculateSH9(theta, phi, groupIndex);
     GroupMemoryBarrierWithGroupSync();
