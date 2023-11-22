@@ -223,7 +223,7 @@
 				float lh = max(saturate(dot(lightDir, halfVector)), 0.000001);
 				float nh = max(saturate(dot(normal, halfVector)), 0.000001);
 
-				float3 F0 = lerp(half3(0.04, 0.04, 0.0), albedo, metallic);
+				float3 F0 = lerp(half3(0.04, 0.04, 0.04), albedo, metallic);
 				float3 F = F0 + (1 - F0) * exp2((-5.55473 * vh - 6.98316) * vh);
 
 
@@ -246,6 +246,7 @@
 
 				float4 result = float4(directResult + indirectResult, 1);
 				//result.rgb = MyShadeSH9(float4(normal, 1));
+				result.rgb = indirectSpecular;
 
 				return result;
 			}

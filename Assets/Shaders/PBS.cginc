@@ -85,15 +85,49 @@ half4 SH9(float3 dir)
     _SH9[8] * GetY2p2(d);
     return color;
 }
-float3 IndirectLightDiffuse(float3 normal)
-{
-	half3 sh9Color = SH9(float4(normal, 1));
 
-	return sh9Color;
+float3 FresnelSchlickRoughness(float cosTheta, float3 F0, float roughness)
+{
+	return F0 + (max(float3(1.0 - roughness, 1.0 - roughness, 1.0 - roughness), F0) - F0) * pow(1.0 - cosTheta, 5.0);
+}
+
+float3 IndirectLightDiffuse(float3 albedo, float3 normal, float roughness, float metallic, float nv, float F0)
+{
+	float3 flast = FresnelSchlickRoughness(max(nv, 0.0), F0, roughness);
+	float3 kdLast = (1 - flast) * (1 - metallic);
+
+	float3 sh9Color = SH9(float4(normal, 1));
+	float3 ambient = 0.03 * albedo;
+	float3 iblDiffuse = (ambient + sh9Color) * kdLast * albedo;
+
+	return iblDiffuse;
 }
 //// IndirectLightDiffuse End
 
-float3 IndirectLightSpecular()
+//// IndirectLightSpecular Start
+float3 IndirectLightSpecular(float3 normal, float3 viewDir, float perceptualRoughness, float roughness, float nv)
 {
-	return 0;
+	float mipRoughness = perceptualRoughness * (1.7 - 0.7 * perceptualRoughness);
+	float mip = mipRoughness * SpecCubeLodSteps;
+	float3 reflectVec = reflect(-viewDir, normal);
+
+	//float4 rgbm = _Cubemap.SampleLevel(Sampler_PointClamp, reflectVec, 0);
+	float4 rgbm = texCUBElod(_Cubemap, float4(reflectVec, mip));
+	float3 iblSpecular = rgbm.rgb;
+
+	float2 envBDRF = tex2D(_LUT, float2(lerp(0, 0.99, nv), lerp(0, 0.99, roughness))).rg;
+
+	float3 iblSpecularResult = iblSpecular * (/*flast * */envBDRF.r + envBDRF.g);
+	return iblSpecularResult;
+//	float4 rgbm = texCUBE(_Cubemap, float4(reflectVec, 0));
+//	//rgbm.rgb = DecodeHDR(rgbm, _Cubemap_HDR);
+//
+//	half alpha = _Cubemap_HDR.w * (rgbm.a - 1.0) + 1.0;
+//#   if defined(UNITY_USE_NATIVE_HDR)
+//	return _Cubemap_HDR.x * rgbm.rgb; // Multiplier for future HDRI relative to absolute conversion.
+//#   else
+//	return (_Cubemap_HDR.x * pow(alpha, _Cubemap_HDR.y)) * rgbm.rgb;
+//#   endif
+//	return rgbm.rgb;
 }
+//// IndirectLightSpecular End

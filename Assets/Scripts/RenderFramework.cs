@@ -17,8 +17,6 @@ public class RenderFramework : MonoBehaviour
     [SerializeField]
     Cubemap cubemap;
     [SerializeField]
-    GraphicsFormat format;
-    [SerializeField]
     RenderTexture sh9Cubemap;
 
     [SerializeField]
@@ -69,7 +67,7 @@ public class RenderFramework : MonoBehaviour
         // https://docs.unity3d.com/ScriptReference/Experimental.Rendering.GraphicsFormat.html
         // R16G16B16A16_SFloat: A four-component, 64-bit signed floating-point format that has a 16-bit R component in bytes 0..1, a 16-bit G component in bytes 2..3, a 16-bit B component in bytes 4..5, and a 16-bit A component in bytes 6..7.
 
-        format = cubemap.graphicsFormat;
+        Shader.SetGlobalTexture("_Cubemap", cubemap);
 
         Sh9GeneratorAsync(cubemap, _sh9 => 
         {

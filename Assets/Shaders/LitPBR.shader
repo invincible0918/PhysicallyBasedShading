@@ -7,8 +7,8 @@ Shader "Custom/LitPBR"
 		_RoughnessTex			("Roughness",			2D)				= "white" {}
 		_RoughnessScale			("RoughnessScale",      Range(0, 1))	= 0
 		_NormalTex				("Normal",				2D)				= "bump" {}
-		_Cubemap				("Reflection Cubemap",	Cube)		= "_Skybox" { }
-
+		_Cubemap				("Reflection Cubemap",	Cube)			= "_Skybox" { }
+		_LUT					("LUT",					2D)				= "white" {}
 		// Blending state
 		[HideInInspector] _Mode("__mode", Float) = 0.0
 		[HideInInspector] _SrcBlend("__src", Float) = 1.0
@@ -25,16 +25,17 @@ Shader "Custom/LitPBR"
 		//  Base forward pass (directional light, emission, lightmaps, ...)
 		Pass
 		{
-			Name "FORWARD"
-			Tags { "LightMode" = "ForwardBase" }
+			//Name "FORWARD"
+			//Tags { "LightMode" = "ForwardBase" }
 
-			Blend[_SrcBlend][_DstBlend]
-			ZWrite[_ZWrite]
+			//Blend[_SrcBlend][_DstBlend]
+			//ZWrite[_ZWrite]
 
 			CGPROGRAM
 			#pragma vertex vertForward
 			#pragma fragment fragForward
 
+			#include "UnityCG.cginc"
 			#include "SH9Common.hlsl"
 			#include "StandardCoreForward.cginc"
 

@@ -58,13 +58,13 @@ float3 BRDF(float3 albedo,
 
     float3 directLightDiffuse = DirectLightDiffuse(albedo, perceptualRoughness, nv, nl, lh);
     float3 directLightSpecular = 0;// DirectLightSpecular(albedo, metallic, roughness, nv, nl, nh, vh);
-    float3 indirectLightDiffuse = IndirectLightDiffuse(normal);
-    float3 indirectLightSpecular = IndirectLightSpecular();
+    float3 indirectLightDiffuse = IndirectLightDiffuse(albedo, normal, roughness, metallic, nv, specColor);
+    float3 indirectLightSpecular = IndirectLightSpecular(normal, viewDir, perceptualRoughness, roughness, nv);
 
     float3 directLight = (directLightDiffuse + directLightSpecular) * _DirectionalLightColor * nl;
-
-    float3 brdf = directLight + indirectLightDiffuse + indirectLightSpecular;
-    brdf = indirectLightDiffuse;
+    float3 indirectLight = indirectLightDiffuse + indirectLightSpecular;
+    float3 brdf = directLight + indirectLight;
+    brdf = indirectLightSpecular;
 
     return brdf;
 }

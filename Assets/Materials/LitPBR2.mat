@@ -7,7 +7,7 @@ Material:
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_Name: LitPBR
+  m_Name: LitPBR2
   m_Shader: {fileID: 4800000, guid: 1ba557a4b6451a24185f269d3f8172a8, type: 3}
   m_ValidKeywords: []
   m_InvalidKeywords: []
