@@ -35,10 +35,9 @@ VertexOutputForward vertForward(VertexInput v)
 
 
 float3 BRDF(float3 albedo,
-    float3 specColor, 
-    float perceptualRoughness,
+    float3 normal,
     float metallic,
-    float3 normal, 
+    float perceptualRoughness,
     float3 viewDir,
     float3 lightDir)
 {
@@ -56,15 +55,19 @@ float3 BRDF(float3 albedo,
 
     float vh = saturate(dot(viewDir, h));
 
+    float3 f0 = lerp(LinearColorSpaceDielectricSpec.rgb, albedo, metallic);
+    float3 fLast = FresnelSchlickRoughness(max(nv, 0.0), f0, roughness);
+    float3 f;
+
     float3 directLightDiffuse = DirectLightDiffuse(albedo, perceptualRoughness, nv, nl, lh);
-    float3 directLightSpecular = 0;// DirectLightSpecular(albedo, metallic, roughness, nv, nl, nh, vh);
-    float3 indirectLightDiffuse = IndirectLightDiffuse(albedo, normal, roughness, metallic, nv, specColor);
-    float3 indirectLightSpecular = IndirectLightSpecular(normal, viewDir, perceptualRoughness, roughness, nv);
+    float3 directLightSpecular = DirectLightSpecular(roughness, nv, nl, nh, vh, f0, /*out float3*/ f);
+
+    float3 indirectLightDiffuse = IndirectLightDiffuse(albedo, normal, metallic, fLast);
+    float3 indirectLightSpecular = IndirectLightSpecular(normal, viewDir, perceptualRoughness, roughness, nv, fLast);
 
     float3 directLight = (directLightDiffuse + directLightSpecular) * _DirectionalLightColor * nl;
     float3 indirectLight = indirectLightDiffuse + indirectLightSpecular;
     float3 brdf = directLight + indirectLight;
-    brdf = indirectLightSpecular;
 
     return brdf;
 }
@@ -88,17 +91,14 @@ float3 GetNormal(float2 uv, float4 tangentToWorld[3])
 float4 fragForward(VertexOutputForward i) : SV_Target
 {
     float3 albedo = tex2D(_MainTex, i.tex).rgb;
-    float metallic = tex2D(_MetallicTex, i.tex).r;
-    float perceptualRoughness = tex2D(_RoughnessTex, i.tex).r/* * _RoughnessScale*/;
-    float3 specColor = lerp(LinearColorSpaceDielectricSpec.rgb, albedo, metallic);
-    float oneMinusReflectivity = LinearColorSpaceDielectricSpec.a - metallic * LinearColorSpaceDielectricSpec.a;
-    float3 diffColor = albedo * oneMinusReflectivity;
     float3 normalWorld = GetNormal(i.tex, i.tangentToWorldAndPackedData);
+    float metallic = tex2D(_MetallicTex, i.tex).r;
+    float perceptualRoughness = tex2D(_RoughnessTex, i.tex).r;
+    //float perceptualRoughness = _RoughnessScale;
     float3 eyeVec = normalize(i.eyeVec);
-    float3 posWorld = float3(i.tangentToWorldAndPackedData[0].w, i.tangentToWorldAndPackedData[1].w, i.tangentToWorldAndPackedData[2].w);
 
     float4 finalColor = 0;
-    finalColor.rgb = BRDF(albedo, specColor, perceptualRoughness, metallic, normalWorld, -eyeVec, -_DirectionalLightWorldSpace);
+    finalColor.rgb = BRDF(albedo, normalWorld, metallic, perceptualRoughness, -eyeVec, -_DirectionalLightWorldSpace);
     finalColor.a = 1;
 
     return finalColor;

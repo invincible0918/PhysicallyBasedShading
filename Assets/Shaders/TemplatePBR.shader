@@ -246,7 +246,6 @@
 
 				float4 result = float4(directResult + indirectResult, 1);
 				//result.rgb = MyShadeSH9(float4(normal, 1));
-				result.rgb = indirectSpecular;
 
 				return result;
 			}

@@ -17,6 +17,9 @@ public class RenderFramework : MonoBehaviour
     [SerializeField]
     Cubemap cubemap;
     [SerializeField]
+    Texture2D brdf;
+
+    [SerializeField]
     RenderTexture sh9Cubemap;
 
     [SerializeField]
@@ -37,11 +40,30 @@ public class RenderFramework : MonoBehaviour
 
     Camera cam;
 
+    static RenderFramework instance;
+
+    public static RenderFramework Instance()
+    {
+        return instance;
+    }
+
+    public Cubemap Cubemap
+    {
+        get{ return cubemap; }
+    }
+
+    public Texture2D BRDF
+    {
+        get{ return brdf; }
+    }
+
     // Start is called before the first frame update
     void Start()
     {
         InitCamera();
         InitCubemap();
+
+        instance = this;
         //InitSphericalHarmonic();
     }
 
@@ -67,7 +89,8 @@ public class RenderFramework : MonoBehaviour
         // https://docs.unity3d.com/ScriptReference/Experimental.Rendering.GraphicsFormat.html
         // R16G16B16A16_SFloat: A four-component, 64-bit signed floating-point format that has a 16-bit R component in bytes 0..1, a 16-bit G component in bytes 2..3, a 16-bit B component in bytes 4..5, and a 16-bit A component in bytes 6..7.
 
-        Shader.SetGlobalTexture("_Cubemap", cubemap);
+        Shader.SetGlobalTexture("_CubeTex", cubemap);
+        Shader.SetGlobalTexture("_BRDFTex", brdf);
 
         Sh9GeneratorAsync(cubemap, _sh9 => 
         {
@@ -83,7 +106,7 @@ public class RenderFramework : MonoBehaviour
         });
     }
 
-    public AsyncGPUReadbackRequest Sh9GeneratorAsync(Cubemap cubemap, System.Action<Vector4[]> callback)
+    AsyncGPUReadbackRequest Sh9GeneratorAsync(Cubemap cubemap, System.Action<Vector4[]> callback)
     {
         int groupCount = sampleSize / threadCount;
         ComputeBuffer shcBuffer = new ComputeBuffer(groupCount * groupCount * sh9Count, 16);

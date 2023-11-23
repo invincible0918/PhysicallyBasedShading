@@ -11,16 +11,15 @@ sampler2D _MainTex;
 sampler2D _NormalTex;
 sampler2D _MetallicTex;
 sampler2D _RoughnessTex;
-sampler2D _LUT;
-samplerCUBE _Cubemap;
-half4 _Cubemap_HDR;
+sampler2D _BRDFTex;
+samplerCUBE _CubeTex;
 
 //SamplerState Sampler_LinearClamp;
 //SamplerState Sampler_PointClamp;
 
 #define LinearColorSpaceDielectricSpec half4(0.04, 0.04, 0.04, 1.0 - 0.04) // standard dielectric reflectivity coef at incident angle (= 4%)
 #define PI 3.14159265359f
-#define SpecCubeLodSteps 6
+#define SpecCubeLodSteps 9
 
 struct VertexInput
 {

@@ -2,18 +2,18 @@ Shader "Custom/LitPBR"
 {
 	Properties
 	{
-		_MainTex				("Albedo",				2D)				= "white" {}
-		_MetallicTex			("Metallic",			2D)				= "white" {}
-		_RoughnessTex			("Roughness",			2D)				= "white" {}
-		_RoughnessScale			("RoughnessScale",      Range(0, 1))	= 0
-		_NormalTex				("Normal",				2D)				= "bump" {}
-		_Cubemap				("Reflection Cubemap",	Cube)			= "_Skybox" { }
-		_LUT					("LUT",					2D)				= "white" {}
+		_MainTex								("Albedo",				2D)				= "white" {}
+		_MetallicTex							("Metallic",			2D)				= "white" {}
+		_RoughnessTex							("Roughness",			2D)				= "white" {}
+		_RoughnessScale							("RoughnessScale",      Range(0, 1))	= 0
+		_NormalTex								("Normal",				2D)				= "bump" {}
+		[HideInInspector] _CubeTex				("Reflection Cubemap",	Cube)			= "_Skybox" { }
+		[HideInInspector] _BRDFTex				("IBL Brdf LUT",		2D)				= "white" {}
 		// Blending state
-		[HideInInspector] _Mode("__mode", Float) = 0.0
-		[HideInInspector] _SrcBlend("__src", Float) = 1.0
-		[HideInInspector] _DstBlend("__dst", Float) = 0.0
-		[HideInInspector] _ZWrite("__zw", Float) = 1.0
+		[HideInInspector] _Mode					("__mode",				Float)			= 0.0
+		[HideInInspector] _SrcBlend				("__src",				Float)			= 1.0
+		[HideInInspector] _DstBlend				("__dst",				Float)			= 0.0
+		[HideInInspector] _ZWrite				("__zw",				Float)			= 1.0
 	}
 
 	SubShader

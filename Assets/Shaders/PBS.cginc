@@ -48,22 +48,14 @@ float SmithJointApprox(float nv, float nl, float roughness)
 	return G;
 }
 
-half3 Fresnel(float3 albedo, float metallic, float vh)
-{
-	float3 F0 = lerp(LinearColorSpaceDielectricSpec.rgb, albedo, metallic);
-	float3 F = F0 + (1 - F0) * exp2((-5.55473 * vh - 6.98316) * vh);
-
-	return vh;
-}
-
-float3 DirectLightSpecular(float3 albedo, float metallic, float roughness, float nv, float nl, float nh, float vh)
+float3 DirectLightSpecular(float roughness, float nv, float nl, float nh, float vh, float3 f0, out float3 F)
 {
 	// https://github.com/EpicGames/UnrealEngine/blob/5ccd1d8b91c944d275d04395a037636837de2c56/Engine/Shaders/Private/BRDF.ush
     float D = TrowbridgeReitzGGX(nh, roughness);
     float G = SmithJointApprox(nv, nl, roughness);
-    float3 F = Fresnel(albedo, metallic, vh);
+    /*float3 */F = f0 + (1 - f0) * exp2((-5.55473 * vh - 6.98316) * vh);
 
-	return D * G * F / 4 * nv * nl;
+	return D * G * F * 0.25 / (nv * nl);
 }
 //// DirectLightSpecular End
 
@@ -91,10 +83,9 @@ float3 FresnelSchlickRoughness(float cosTheta, float3 F0, float roughness)
 	return F0 + (max(float3(1.0 - roughness, 1.0 - roughness, 1.0 - roughness), F0) - F0) * pow(1.0 - cosTheta, 5.0);
 }
 
-float3 IndirectLightDiffuse(float3 albedo, float3 normal, float roughness, float metallic, float nv, float F0)
+float3 IndirectLightDiffuse(float3 albedo, float3 normal, float metallic, float3 fLast)
 {
-	float3 flast = FresnelSchlickRoughness(max(nv, 0.0), F0, roughness);
-	float3 kdLast = (1 - flast) * (1 - metallic);
+	float3 kdLast = (1 - fLast) * (1 - metallic);
 
 	float3 sh9Color = SH9(float4(normal, 1));
 	float3 ambient = 0.03 * albedo;
@@ -105,19 +96,20 @@ float3 IndirectLightDiffuse(float3 albedo, float3 normal, float roughness, float
 //// IndirectLightDiffuse End
 
 //// IndirectLightSpecular Start
-float3 IndirectLightSpecular(float3 normal, float3 viewDir, float perceptualRoughness, float roughness, float nv)
+float3 IndirectLightSpecular(float3 normal, float3 viewDir, float perceptualRoughness, float roughness, float nv, float3 fLast)
 {
 	float mipRoughness = perceptualRoughness * (1.7 - 0.7 * perceptualRoughness);
 	float mip = mipRoughness * SpecCubeLodSteps;
 	float3 reflectVec = reflect(-viewDir, normal);
 
 	//float4 rgbm = _Cubemap.SampleLevel(Sampler_PointClamp, reflectVec, 0);
-	float4 rgbm = texCUBElod(_Cubemap, float4(reflectVec, mip));
+	float4 rgbm = texCUBElod(_CubeTex, float4(reflectVec, mip));
 	float3 iblSpecular = rgbm.rgb;
 
-	float2 envBDRF = tex2D(_LUT, float2(lerp(0, 0.99, nv), lerp(0, 0.99, roughness))).rg;
+	float2 uv = float2(lerp(0, 0.99, nv), lerp(0, 0.99, roughness));
+	float2 envBDRF = tex2D(_BRDFTex, uv).rg;
 
-	float3 iblSpecularResult = iblSpecular * (/*flast * */envBDRF.r + envBDRF.g);
+	float3 iblSpecularResult = iblSpecular * (fLast * envBDRF.r + envBDRF.g);
 	return iblSpecularResult;
 //	float4 rgbm = texCUBE(_Cubemap, float4(reflectVec, 0));
 //	//rgbm.rgb = DecodeHDR(rgbm, _Cubemap_HDR);
