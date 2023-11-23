@@ -17,6 +17,7 @@ samplerCUBE _CubeTex;
 //SamplerState Sampler_LinearClamp;
 //SamplerState Sampler_PointClamp;
 
+#define Epsilon 0.000001
 #define LinearColorSpaceDielectricSpec half4(0.04, 0.04, 0.04, 1.0 - 0.04) // standard dielectric reflectivity coef at incident angle (= 4%)
 #define PI 3.14159265359f
 #define SpecCubeLodSteps 9

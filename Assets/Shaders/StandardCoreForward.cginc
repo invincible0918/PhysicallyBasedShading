@@ -45,15 +45,15 @@ float3 BRDF(float3 albedo,
     roughness = max(roughness, 0.002);
     float3 h = normalize(lightDir + viewDir);
 
-    float nv = saturate(dot(normal, viewDir)); 
+    float nv = max(saturate(dot(normal, viewDir)), Epsilon);
 
-    float nl = saturate(dot(normal, lightDir));
-    float nh = saturate(dot(normal, h));
+    float nl = max(saturate(dot(normal, lightDir)), Epsilon);
+    float nh = max(saturate(dot(normal, h)), Epsilon);
 
-    float lv = saturate(dot(lightDir, viewDir));
-    float lh = saturate(dot(lightDir, h));
+    float lv = max(saturate(dot(lightDir, viewDir)), Epsilon);
+    float lh = max(saturate(dot(lightDir, h)), Epsilon);
 
-    float vh = saturate(dot(viewDir, h));
+    float vh = max(saturate(dot(viewDir, h)), Epsilon);
 
     float3 f0 = lerp(LinearColorSpaceDielectricSpec.rgb, albedo, metallic);
     float3 fLast = FresnelSchlickRoughness(max(nv, 0.0), f0, roughness);
@@ -62,12 +62,16 @@ float3 BRDF(float3 albedo,
     float3 directLightDiffuse = DirectLightDiffuse(albedo, perceptualRoughness, nv, nl, lh);
     float3 directLightSpecular = DirectLightSpecular(roughness, nv, nl, nh, vh, f0, /*out float3*/ f);
 
+    float kd = (1 - f) * (1 - metallic);
+	float ks = f;
+
     float3 indirectLightDiffuse = IndirectLightDiffuse(albedo, normal, metallic, fLast);
     float3 indirectLightSpecular = IndirectLightSpecular(normal, viewDir, perceptualRoughness, roughness, nv, fLast);
 
-    float3 directLight = (directLightDiffuse + directLightSpecular) * _DirectionalLightColor * nl;
+    float3 directLight = (kd * directLightDiffuse + ks * directLightSpecular) * _DirectionalLightColor * nl;
     float3 indirectLight = indirectLightDiffuse + indirectLightSpecular;
     float3 brdf = directLight + indirectLight;
+    brdf = indirectLightDiffuse;
 
     return brdf;
 }
