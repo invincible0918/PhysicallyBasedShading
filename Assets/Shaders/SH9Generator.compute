@@ -30,7 +30,8 @@ void CalculateSH9(float theta, float phi, uint groupIndex)
 {
     float3 localSpaceDir = LocalSpaceDirection(theta, phi);
     float4 rgbm = _Cubemap.SampleLevel(Sampler_PointClamp, localSpaceDir, 1);
-    float4 color = pow(rgbm.rgba, 1/ 2.2);
+    float4 color = rgbm.rgba;// pow(rgbm.rgba, 1 / 2.2);
+    //float4 color = pow(rgbm.rgba, 1 / 2.2);
     color.a = 1;
 
     uint N = _SampleSize.x * _SampleSize.y;

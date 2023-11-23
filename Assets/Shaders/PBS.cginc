@@ -62,7 +62,7 @@ float3 DirectLightSpecular(float roughness, float nv, float nl, float nh, float 
 //// IndirectLightDiffuse Start
 uniform float4 _SH9[9];
 
-half4 SH9(float3 dir)
+float4 SH9(float3 dir)
 {
     float3 d = float3(dir.x,dir.z,dir.y);
     float4 color = 
@@ -88,8 +88,10 @@ float3 IndirectLightDiffuse(float3 albedo, float3 normal, float metallic, float3
 	float3 kdLast = (1 - fLast) * (1 - metallic);
 
 	float3 sh9Color = SH9(float4(normal, 1));
+	//float3 color = pow(sh9Color, 2.2).rgb;
+	float3 color = sh9Color.rgb;
 	float3 ambient = 0.03 * albedo;
-	float3 iblDiffuse = (ambient + sh9Color) * kdLast * albedo;
+	float3 iblDiffuse = (ambient + color) * kdLast * albedo;
 
 	return iblDiffuse;
 }
@@ -104,7 +106,9 @@ float3 IndirectLightSpecular(float3 normal, float3 viewDir, float perceptualRoug
 
 	//float4 rgbm = _Cubemap.SampleLevel(Sampler_PointClamp, reflectVec, 0);
 	float4 rgbm = texCUBElod(_CubeTex, float4(reflectVec, mip));
-	float3 iblSpecular = rgbm.rgb;
+	//float4 color = pow(rgbm.rgba, 2.2);
+	float4 color = rgbm.rgba;
+	float3 iblSpecular = color.rgb;
 
 	float2 uv = float2(lerp(0, 0.99, nv), lerp(0, 0.99, roughness));
 	float2 envBDRF = tex2D(_BRDFTex, uv).rg;

@@ -71,7 +71,6 @@ float3 BRDF(float3 albedo,
     float3 directLight = (kd * directLightDiffuse + ks * directLightSpecular) * _DirectionalLightColor * nl;
     float3 indirectLight = indirectLightDiffuse + indirectLightSpecular;
     float3 brdf = directLight + indirectLight;
-    brdf = indirectLightDiffuse;
 
     return brdf;
 }
