@@ -17,6 +17,8 @@ public class RenderFramework : MonoBehaviour
     [SerializeField]
     Cubemap cubemap;
     [SerializeField]
+    GraphicsFormat cubemapFormat;
+    [SerializeField]
     Texture2D brdf;
 
     [SerializeField]
@@ -89,10 +91,14 @@ public class RenderFramework : MonoBehaviour
         // https://docs.unity3d.com/ScriptReference/Experimental.Rendering.GraphicsFormat.html
         // R16G16B16A16_SFloat: A four-component, 64-bit signed floating-point format that has a 16-bit R component in bytes 0..1, a 16-bit G component in bytes 2..3, a 16-bit B component in bytes 4..5, and a 16-bit A component in bytes 6..7.
 
-        Sh9GeneratorAsync(cubemap, _sh9 => 
+        cubemap = RenderSettings.skybox.GetTexture("_Tex") as Cubemap;
+        cubemapFormat = cubemap.graphicsFormat;
+        bool isHDR = true;// cubemapFormat.ToString().ToLower().Contains("float");
+
+        Sh9GeneratorAsync(cubemap, isHDR, _sh9 => 
         {
             sh9 = new List<Vector4>(_sh9);
-            UpdateShader();
+            UpdateShader(isHDR);
 
             // display low frequency cubemap
             Sh9ReconstructorAsync(_sh9, _rt => 
@@ -103,13 +109,17 @@ public class RenderFramework : MonoBehaviour
         });
     }
 
-    AsyncGPUReadbackRequest Sh9GeneratorAsync(Cubemap cubemap, System.Action<Vector4[]> callback)
+    AsyncGPUReadbackRequest Sh9GeneratorAsync(Cubemap cubemap, bool isHDR, System.Action<Vector4[]> callback)
     {
         int groupCount = sampleSize / threadCount;
         ComputeBuffer shcBuffer = new ComputeBuffer(groupCount * groupCount * sh9Count, 16);
         sh9GeneratorCS.SetTexture(0, "_Cubemap", cubemap);
         sh9GeneratorCS.SetBuffer(0, "_ShcBuffer", shcBuffer);
         sh9GeneratorCS.SetInts("_SampleSize", sampleSize, sampleSize);
+        if (isHDR)
+            sh9GeneratorCS.EnableKeyword("_HDR");
+        else
+            sh9GeneratorCS.DisableKeyword("_HDR");
         sh9GeneratorCS.Dispatch(0, groupCount, groupCount, 1);
         return AsyncGPUReadback.Request(shcBuffer, req => 
         {
@@ -288,9 +298,16 @@ public class RenderFramework : MonoBehaviour
         Shader.SetGlobalVector("_DirectionalLightColor", directionalLight.color * directionalLight.intensity);
     }
 
-    void UpdateShader()
+    void UpdateShader(bool isHDR)
     {
         if (sh9 != null && sh9.Count != 0)
+        {
             Shader.SetGlobalVectorArray("_SH9", sh9);
+
+            if (isHDR)
+                Shader.EnableKeyword("_HDR");
+            else
+                Shader.DisableKeyword("_HDR");
+        }
     }
 }

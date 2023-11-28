@@ -34,6 +34,7 @@ Shader "Custom/LitPBR"
 			CGPROGRAM
 			#pragma vertex vertForward
 			#pragma fragment fragForward
+			#pragma multi_compile __ _HDR
 
 			#include "UnityCG.cginc"
 			#include "SH9Common.hlsl"

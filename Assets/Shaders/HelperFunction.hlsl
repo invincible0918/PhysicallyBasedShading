@@ -57,4 +57,24 @@ float3 LocalSpaceDirection(float theta, float phi)
     return localSpaceDir;
 }
 
+inline half3 GammaToLinearSpace(half3 sRGB)
+{
+    // Approximate version from http://chilliant.blogspot.com.au/2012/08/srgb-approximations-for-hlsl.html?m=1
+    return sRGB * (sRGB * (sRGB * 0.305306011h + 0.682171111h) + 0.012522878h);
+
+    // Precise version, useful for debugging.
+    //return half3(GammaToLinearSpaceExact(sRGB.r), GammaToLinearSpaceExact(sRGB.g), GammaToLinearSpaceExact(sRGB.b));
+}
+
+inline half3 LinearToGammaSpace(half3 linRGB)
+{
+    linRGB = max(linRGB, half3(0.h, 0.h, 0.h));
+    // An almost-perfect approximation from http://chilliant.blogspot.com.au/2012/08/srgb-approximations-for-hlsl.html?m=1
+    return max(1.055h * pow(linRGB, 0.416666667h) - 0.055h, 0.h);
+
+    // Exact version, useful for debugging.
+    //return half3(LinearToGammaSpaceExact(linRGB.r), LinearToGammaSpaceExact(linRGB.g), LinearToGammaSpaceExact(linRGB.b));
+}
+
+
 #endif

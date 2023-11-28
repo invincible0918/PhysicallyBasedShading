@@ -1,3 +1,5 @@
+// https://learnopengl.com/PBR/Theory
+
 inline half Pow5(half x)
 {
 	return x * x * x * x * x;
@@ -24,7 +26,7 @@ float3 DirectLightDiffuse(float3 albedo, float nv, float nl, float lh, float per
 	//float3 diffColor = kd * LambertDiffuse(albedo);
 	float3 diffColor = kd * DisneyDiffuse(albedo, nv, nl, lh, perceptualRoughness);
 
-	return diffColor/* * PI*/;
+	return diffColor;
 }
 //// DirectLightDiffuse End
 
@@ -36,24 +38,43 @@ float TrowbridgeReitzGGX(float nh, float roughness)
 	return a2 / (PI * d * d + 1e-7f);
 }
 
-float SmithJointApprox(float nv, float nl, float roughness)
+float GeometrySchlickGGX(float nv, float k)
+{
+	float nom = nv;
+	float denom = nv * (1.0 - k) + k;
+
+	return nom / denom;
+}
+
+float GeometrySmith(float nv, float nl, float roughness)
 {
 	float a2 = roughness * roughness;
 
 	float kDirectLight = pow(a2 + 1, 2) / 8;
-	//float kIBL = pow(a2, 2) / 8;
+	float kIBL = pow(a2, 2) / 8;
 	float GLeft = nl / lerp(nl, 1, kDirectLight);
 	float GRight = nv / lerp(nv, 1, kDirectLight);
 	float G = GLeft * GRight;
-	return G;
+
+	float ggx1 = GeometrySchlickGGX(nv, kDirectLight);
+	float ggx2 = GeometrySchlickGGX(nl, kDirectLight);
+
+	return ggx1 * ggx2;
+}
+
+float FresnelSchlick(float cosTheta, float3 f0)
+{
+	//return f0 + (1.0 - f0) * exp2((-5.55473 * cosTheta - 6.98316) * cosTheta);
+	return f0 + (1.0 - f0) * pow(1.0 - cosTheta, 5.0);
 }
 
 float3 DirectLightSpecular(float roughness, float nv, float nl, float nh, float vh, float3 f0, out float3 F)
 {
 	// https://github.com/EpicGames/UnrealEngine/blob/5ccd1d8b91c944d275d04395a037636837de2c56/Engine/Shaders/Private/BRDF.ush
     float D = TrowbridgeReitzGGX(nh, roughness);
-    float G = SmithJointApprox(nv, nl, roughness);
-    /*float3 */F = f0 + (1 - f0) * exp2((-5.55473 * vh - 6.98316) * vh);
+    float G = GeometrySmith(nv, nl, roughness);
+	//F = FresnelSchlick(vh, f0);
+	F = FresnelSchlick(nh, f0);
 
 	return D * G * F * 0.25 / (nv * nl);
 }
@@ -88,10 +109,14 @@ float3 IndirectLightDiffuse(float3 albedo, float3 normal, float metallic, float3
 	float3 kdLast = (1 - fLast) * (1 - metallic);
 
 	float3 sh9Color = SH9(float4(normal, 1));
-	//float3 color = pow(sh9Color, 2.2).rgb;
+#if defined(_HDR)
+	float3 color = GammaToLinearSpace(sh9Color);
+#else
 	float3 color = sh9Color.rgb;
+#endif
 	float3 ambient = 0.03 * albedo;
 	float3 iblDiffuse = (ambient + color) * kdLast * albedo;
+	//iblDiffuse = sh9Color;
 
 	return iblDiffuse;
 }

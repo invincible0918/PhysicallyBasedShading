@@ -5,6 +5,7 @@
 #include "HelperFunction.hlsl"
 
 #pragma kernel CSMain
+#pragma multi_compile __ _HDR
 
 #define THREAD_X 8
 #define THREAD_Y 8
@@ -30,9 +31,13 @@ void CalculateSH9(float theta, float phi, uint groupIndex)
 {
     float3 localSpaceDir = LocalSpaceDirection(theta, phi);
     float4 rgbm = _Cubemap.SampleLevel(Sampler_PointClamp, localSpaceDir, 1);
-    float4 color = rgbm.rgba;// pow(rgbm.rgba, 1 / 2.2);
-    //float4 color = pow(rgbm.rgba, 1 / 2.2);
-    color.a = 1;
+
+    float4 color = 1;
+#if defined(_HDR)
+    color.rgb = LinearToGammaSpace(rgbm.rgb);
+#else
+    color.rgb = rgbm.rgb;
+#endif
 
     uint N = _SampleSize.x * _SampleSize.y;
     float A = 4 * PI / N;

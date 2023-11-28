@@ -39,7 +39,8 @@ float3 BRDF(float3 albedo,
     float metallic,
     float perceptualRoughness,
     float3 viewDir,
-    float3 lightDir)
+    float3 lightDir,
+    float3 lightColor)
 {
     float roughness = perceptualRoughness * perceptualRoughness;
     roughness = max(roughness, 0.002);
@@ -68,7 +69,9 @@ float3 BRDF(float3 albedo,
     float3 indirectLightDiffuse = IndirectLightDiffuse(albedo, normal, metallic, fLast);
     float3 indirectLightSpecular = IndirectLightSpecular(normal, viewDir, perceptualRoughness, roughness, nv, fLast);
 
-    float3 directLight = (kd * directLightDiffuse + ks * directLightSpecular) * _DirectionalLightColor * nl;
+    float3 diffColor = kd * directLightDiffuse * lightColor * nl * PI;
+    float3 specColor = /*ks * */directLightSpecular * lightColor * nl * PI;
+    float3 directLight = diffColor + specColor;
     float3 indirectLight = indirectLightDiffuse + indirectLightSpecular;
     float3 brdf = directLight + indirectLight;
 
@@ -99,9 +102,11 @@ float4 fragForward(VertexOutputForward i) : SV_Target
     float perceptualRoughness = tex2D(_RoughnessTex, i.tex).r;
     //float perceptualRoughness = _RoughnessScale;
     float3 eyeVec = normalize(i.eyeVec);
+    float3 lightDir = -_DirectionalLightWorldSpace;
+    float3 lightColor = GammaToLinearSpace(_DirectionalLightColor);
 
     float4 finalColor = 0;
-    finalColor.rgb = BRDF(albedo, normalWorld, metallic, perceptualRoughness, -eyeVec, -_DirectionalLightWorldSpace);
+    finalColor.rgb = BRDF(albedo, normalWorld, metallic, perceptualRoughness, -eyeVec, lightDir, lightColor);
     finalColor.a = 1;
 
     return finalColor;
