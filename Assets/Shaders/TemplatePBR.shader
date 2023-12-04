@@ -195,6 +195,7 @@
 				float3 IndirectResult = iblDiffuseResult + iblSpecularResult;
 
 				float4 result = float4(DirectLightResult + IndirectResult, 1);
+				//result.rgb = iblDiffuseResult;
 
 				return result;
 			}

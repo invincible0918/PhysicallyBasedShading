@@ -123,6 +123,68 @@ NavMeshSettings:
     debug:
       m_Flags: 0
   m_NavMeshData: {fileID: 0}
+--- !u!1001 &119285322
+PrefabInstance:
+  m_ObjectHideFlags: 0
+  serializedVersion: 2
+  m_Modification:
+    m_TransformParent: {fileID: 0}
+    m_Modifications:
+    - target: {fileID: 161513243228687678, guid: 8159abf48ab2dce4688c22ec8c5ab353, type: 3}
+      propertyPath: m_RootOrder
+      value: 10
+      objectReference: {fileID: 0}
+    - target: {fileID: 161513243228687678, guid: 8159abf48ab2dce4688c22ec8c5ab353, type: 3}
+      propertyPath: m_LocalPosition.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 161513243228687678, guid: 8159abf48ab2dce4688c22ec8c5ab353, type: 3}
+      propertyPath: m_LocalPosition.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 161513243228687678, guid: 8159abf48ab2dce4688c22ec8c5ab353, type: 3}
+      propertyPath: m_LocalPosition.z
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 161513243228687678, guid: 8159abf48ab2dce4688c22ec8c5ab353, type: 3}
+      propertyPath: m_LocalRotation.w
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 161513243228687678, guid: 8159abf48ab2dce4688c22ec8c5ab353, type: 3}
+      propertyPath: m_LocalRotation.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 161513243228687678, guid: 8159abf48ab2dce4688c22ec8c5ab353, type: 3}
+      propertyPath: m_LocalRotation.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 161513243228687678, guid: 8159abf48ab2dce4688c22ec8c5ab353, type: 3}
+      propertyPath: m_LocalRotation.z
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 161513243228687678, guid: 8159abf48ab2dce4688c22ec8c5ab353, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 161513243228687678, guid: 8159abf48ab2dce4688c22ec8c5ab353, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 161513243228687678, guid: 8159abf48ab2dce4688c22ec8c5ab353, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.z
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 161513243228687679, guid: 8159abf48ab2dce4688c22ec8c5ab353, type: 3}
+      propertyPath: m_Name
+      value: teapot
+      objectReference: {fileID: 0}
+    m_RemovedComponents: []
+  m_SourcePrefab: {fileID: 100100000, guid: 8159abf48ab2dce4688c22ec8c5ab353, type: 3}
+--- !u!4 &119285323 stripped
+Transform:
+  m_CorrespondingSourceObject: {fileID: 161513243228687678, guid: 8159abf48ab2dce4688c22ec8c5ab353, type: 3}
+  m_PrefabInstance: {fileID: 119285322}
+  m_PrefabAsset: {fileID: 0}
 --- !u!1 &190108863
 GameObject:
   m_ObjectHideFlags: 0
@@ -233,6 +295,23 @@ Transform:
   m_Father: {fileID: 0}
   m_RootOrder: 6
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!1 &358565194 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 1079921223497824677, guid: 8159abf48ab2dce4688c22ec8c5ab353, type: 3}
+  m_PrefabInstance: {fileID: 119285322}
+  m_PrefabAsset: {fileID: 0}
+--- !u!114 &358565198
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 358565194}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: bb92bc9d3576f664aa71d69c729e5871, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
 --- !u!1 &559801956
 GameObject:
   m_ObjectHideFlags: 0
@@ -512,7 +591,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!136 &1069745990
 CapsuleCollider:
   m_ObjectHideFlags: 0
@@ -773,7 +852,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!136 &1463816634
 CapsuleCollider:
   m_ObjectHideFlags: 0
@@ -872,7 +951,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!136 &1683229888
 CapsuleCollider:
   m_ObjectHideFlags: 0
@@ -972,7 +1051,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!136 &1692687672
 CapsuleCollider:
   m_ObjectHideFlags: 0
@@ -1278,8 +1357,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: b4067e7008363aa478391a0e4ec0687a, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  target: {fileID: 0}
-  offset: {x: 0, y: 0, z: 0}
+  target: {fileID: 119285323}
+  offset: {x: 0, y: 0.5, z: 0}
   xSpeed: 500
   ySpeed: 500
   zoomSpeed: 5

@@ -67,27 +67,19 @@ float GeometrySmith(float nv, float nl, float roughness)
 float FresnelSchlick(float3 f0, float3 f90, float cosTheta)
 {
 	//return f0 + (1.0 - f0) * exp2((-5.55473 * cosTheta - 6.98316) * cosTheta);
-<<<<<<< HEAD
 	//return f0 + (1.0 - f0) * pow(1.0 - cosTheta, 5.0);
 	float t = pow(1.0 - cosTheta, 5.0);
 	return lerp(f0, f90, t);
-=======
-	// note the clamp here to prevent black spots
-	return f0 + (1.0 - f0) * pow(clamp(1.0 - cosTheta, 0.0, 1.0), 5.0);
->>>>>>> 4bf6bf5b6c3aa2feacad5f30eb1f37922d24e110
+	//// note the clamp here to prevent black spots
+	//return f0 + (1.0 - f0) * pow(clamp(1.0 - cosTheta, 0.0, 1.0), 5.0);
 }
 
 float3 DirectLightSpecular(float roughness, float nv, float nl, float nh, float vh, float3 f0, out float3 F)
 {
     float D = TrowbridgeReitzGGX(nh, roughness);
     float G = GeometrySmith(nv, nl, roughness);
-<<<<<<< HEAD
 	//F = FresnelSchlick(f0, 1, vh);
 	F = FresnelSchlick(f0, 1, nh);
-=======
-	F = FresnelSchlick(vh, f0);
-	//F = FresnelSchlick(nh, f0);
->>>>>>> 4bf6bf5b6c3aa2feacad5f30eb1f37922d24e110
 
 	return D * G * F * 0.25 / (nv * nl);
 }
@@ -131,7 +123,7 @@ float3 IndirectLightDiffuse(float3 albedo, float3 normal, float metallic, float3
 	float3 ambient = 0.03 * albedo;
 	float3 iblDiffuse = (ambient + color) * kdLast * albedo;
 
-	return GammaToLinearSpace(sh9Color);
+	return iblDiffuse;
 }
 //// IndirectLightDiffuse End
 

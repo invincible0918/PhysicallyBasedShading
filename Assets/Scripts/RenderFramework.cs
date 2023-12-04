@@ -63,8 +63,8 @@ public class RenderFramework : MonoBehaviour
     void Start()
     {
         InitCamera();
-        //InitCubemap();
-        InitSphericalHarmonic();
+        InitCubemap();
+        //InitSphericalHarmonic();
 
         instance = this;
     }
