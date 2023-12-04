@@ -63,10 +63,10 @@ public class RenderFramework : MonoBehaviour
     void Start()
     {
         InitCamera();
-        InitCubemap();
+        //InitCubemap();
+        InitSphericalHarmonic();
 
         instance = this;
-        //InitSphericalHarmonic();
     }
 
     //void OnEnable()
@@ -174,6 +174,9 @@ public class RenderFramework : MonoBehaviour
 
     void InitSphericalHarmonic()
     {
+        cubemap = RenderSettings.skybox.GetTexture("_Tex") as Cubemap;
+        cubemapFormat = cubemap.graphicsFormat;
+
         Vector4[] coefs = new Vector4[sh9Count];
 
         int sampleNum = 10000;
@@ -277,6 +280,9 @@ public class RenderFramework : MonoBehaviour
             faceCalculate[faceIndex]++;
         }
         col = cubemap.GetPixel((CubemapFace)faceIndex, x, y);
+        col.r = Mathf.Pow(col.r, 1 / 2.2f);
+        col.g = Mathf.Pow(col.g, 1 / 2.2f);
+        col.b = Mathf.Pow(col.b, 1 / 2.2f);
         Vector4 colVec4 = new Vector4(col.r, col.g, col.b, col.a);
         return colVec4;
     }

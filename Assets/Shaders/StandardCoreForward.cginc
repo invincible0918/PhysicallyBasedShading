@@ -69,8 +69,8 @@ float3 BRDF(float3 albedo,
     float3 directLightSpecular = DirectLightSpecular(roughness, nv, nl, nh, vh, f0, /*out float3*/ f);
     f = f0 + (1 - f0) * exp2((-5.55473 * vh - 6.98316) * vh);
 
-    float kd = (1 - f) * (1 - metallic);
 	float ks = f;
+    float kd = (1 - ks) * (1 - metallic);
 
     float3 indirectLightDiffuse = IndirectLightDiffuse(albedo, normal, metallic, fLast);
 
@@ -79,9 +79,7 @@ float3 BRDF(float3 albedo,
     // Unity way
     float3 indirectLightSpecular = IndirectLightSpecular(normal, viewDir, perceptualRoughness, roughness, nv, f0, f90);
 
-    float3 diffColor = kd * directLightDiffuse * lightColor * nl * PI;
-    float3 specColor = /*ks * */directLightSpecular * lightColor * nl * PI;
-    float3 directLight = diffColor + specColor;
+    float3 directLight = (kd * directLightDiffuse + directLightSpecular) * lightColor * nl * PI;
     float3 indirectLight = indirectLightDiffuse + indirectLightSpecular;
     float3 brdf = directLight + indirectLight;
 
