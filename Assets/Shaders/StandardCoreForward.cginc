@@ -57,17 +57,27 @@ float3 BRDF(float3 albedo,
     float vh = max(saturate(dot(viewDir, h)), Epsilon);
 
     float3 f0 = lerp(LinearColorSpaceDielectricSpec.rgb, albedo, metallic);
+
+    half oneMinusReflectivity = LinearColorSpaceDielectricSpec.a;
+    oneMinusReflectivity = oneMinusReflectivity - metallic * oneMinusReflectivity;
+    float f90 = saturate(1 - perceptualRoughness + (1 - oneMinusReflectivity));
+
     float3 fLast = FresnelSchlickRoughness(max(nv, 0.0), f0, roughness);
     float3 f;
 
     float3 directLightDiffuse = DirectLightDiffuse(albedo, perceptualRoughness, nv, nl, lh);
     float3 directLightSpecular = DirectLightSpecular(roughness, nv, nl, nh, vh, f0, /*out float3*/ f);
+    f = f0 + (1 - f0) * exp2((-5.55473 * vh - 6.98316) * vh);
 
     float kd = (1 - f) * (1 - metallic);
 	float ks = f;
 
     float3 indirectLightDiffuse = IndirectLightDiffuse(albedo, normal, metallic, fLast);
-    float3 indirectLightSpecular = IndirectLightSpecular(normal, viewDir, perceptualRoughness, roughness, nv, fLast);
+
+    // Unreal way
+    //float3 indirectLightSpecular = IndirectLightSpecular(normal, viewDir, perceptualRoughness, roughness, nv, fLast);
+    // Unity way
+    float3 indirectLightSpecular = IndirectLightSpecular(normal, viewDir, perceptualRoughness, roughness, nv, f0, f90);
 
     float3 diffColor = kd * directLightDiffuse * lightColor * nl * PI;
     float3 specColor = /*ks * */directLightSpecular * lightColor * nl * PI;
@@ -99,8 +109,8 @@ float4 fragForward(VertexOutputForward i) : SV_Target
     float3 albedo = tex2D(_MainTex, i.tex).rgb;
     float3 normalWorld = GetNormal(i.tex, i.tangentToWorldAndPackedData);
     float metallic = tex2D(_MetallicTex, i.tex).r;
-    float perceptualRoughness = tex2D(_RoughnessTex, i.tex).r;
-    //float perceptualRoughness = _RoughnessScale;
+    //float perceptualRoughness = tex2D(_RoughnessTex, i.tex).r;
+    float perceptualRoughness = _RoughnessScale;
     float3 eyeVec = normalize(i.eyeVec);
     float3 lightDir = -_DirectionalLightWorldSpace;
     float3 lightColor = GammaToLinearSpace(_DirectionalLightColor);
@@ -110,22 +120,5 @@ float4 fragForward(VertexOutputForward i) : SV_Target
     finalColor.a = 1;
 
     return finalColor;
-    //FRAGMENT_SETUP(s)
-
-    //UNITY_SETUP_INSTANCE_ID(i);
-    //UNITY_SETUP_STEREO_EYE_INDEX_POST_VERTEX(i);
-
-    //UnityLight mainLight = MainLight();
-    //UNITY_LIGHT_ATTENUATION(atten, i, s.posWorld);
-
-    //float occlusion = Occlusion(i.tex.xy);
-    //UnityGI gi = FragmentGI(s, occlusion, i.ambientOrLightmapUV, atten, mainLight);
-
-    //float4 c = UNITY_BRDF_PBS(s.diffColor, s.specColor, s.oneMinusReflectivity, s.smoothness, s.normalWorld, -s.eyeVec, gi.light, gi.indirect);
-    //c.rgb += Emission(i.tex.xy);
-
-    //UNITY_EXTRACT_FOG_FROM_EYE_VEC(i);
-    //UNITY_APPLY_FOG(_unity_fogCoord, c.rgb);
-    //return OutputForward(c, s.alpha);
 }
 

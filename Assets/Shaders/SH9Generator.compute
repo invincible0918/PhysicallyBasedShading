@@ -43,15 +43,26 @@ void CalculateSH9(float theta, float phi, uint groupIndex)
     float A = 4 * PI / N;
     uint groupOffset = groupIndex * ShcCount;
 
-    ShcGroup[groupOffset + 0] = color * GetY00(theta, phi) * A;
-    ShcGroup[groupOffset + 1] = color * GetY1n1(theta, phi) * A;
-    ShcGroup[groupOffset + 2] = color * GetY10(theta, phi) * A;
-    ShcGroup[groupOffset + 3] = color * GetY1p1(theta, phi) * A;
-    ShcGroup[groupOffset + 4] = color * GetY2n2(theta, phi) * A;
-    ShcGroup[groupOffset + 5] = color * GetY2n1(theta, phi) * A;
-    ShcGroup[groupOffset + 6] = color * GetY20(theta, phi) * A;
-    ShcGroup[groupOffset + 7] = color * GetY2p1(theta, phi) * A;
-    ShcGroup[groupOffset + 8] = color * GetY2p2(theta, phi) * A;
+    //ShcGroup[groupOffset + 0] = color * GetY00(theta, phi) * A;
+    //ShcGroup[groupOffset + 1] = color * GetY1n1(theta, phi) * A;
+    //ShcGroup[groupOffset + 2] = color * GetY10(theta, phi) * A;
+    //ShcGroup[groupOffset + 3] = color * GetY1p1(theta, phi) * A;
+    //ShcGroup[groupOffset + 4] = color * GetY2n2(theta, phi) * A;
+    //ShcGroup[groupOffset + 5] = color * GetY2n1(theta, phi) * A;
+    //ShcGroup[groupOffset + 6] = color * GetY20(theta, phi) * A;
+    //ShcGroup[groupOffset + 7] = color * GetY2p1(theta, phi) * A;
+    //ShcGroup[groupOffset + 8] = color * GetY2p2(theta, phi) * A;
+
+    localSpaceDir = localSpaceDir.xzy;
+    ShcGroup[groupOffset + 0] = color * GetY00(localSpaceDir) * A;
+    ShcGroup[groupOffset + 1] = color * GetY1n1(localSpaceDir) * A;
+    ShcGroup[groupOffset + 2] = color * GetY10(localSpaceDir) * A;
+    ShcGroup[groupOffset + 3] = color * GetY1p1(localSpaceDir) * A;
+    ShcGroup[groupOffset + 4] = color * GetY2n2(localSpaceDir) * A;
+    ShcGroup[groupOffset + 5] = color * GetY2n1(localSpaceDir) * A;
+    ShcGroup[groupOffset + 6] = color * GetY20(localSpaceDir) * A;
+    ShcGroup[groupOffset + 7] = color * GetY2p1(localSpaceDir) * A;
+    ShcGroup[groupOffset + 8] = color * GetY2p2(localSpaceDir) * A;
 }
 
 [numthreads(THREAD_X, THREAD_Y, 1)]
@@ -62,9 +73,7 @@ void CSMain (uint3 groupID : SV_GroupID, uint3 id : SV_DispatchThreadID, uint gr
 
     //// uniform sampling
     float theta, phi;
-    //UniformSampling(/*out */theta, /*out */phi);
-    theta = acos(1 - id.x * 2.0 / (_SampleSize.x - 1));
-    phi = 2 * PI * (id.y * 1.0 / (_SampleSize.y - 1));
+    UniformSampling(float2(float(id.x) / _SampleSize.x, float(id.y) / _SampleSize.y), /*out */theta, /*out */phi);
 
     CalculateSH9(theta, phi, groupIndex);
     GroupMemoryBarrierWithGroupSync();

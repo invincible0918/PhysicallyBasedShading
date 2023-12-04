@@ -35,10 +35,10 @@ float Rand()
     return RandFloat();
 }
 
-void UniformSampling(out float theta, out float phi)
+void UniformSampling(float2 rand, out float theta, out float phi)
 {
-    theta = acos(1 - Rand());
-    phi = 2.0 * PI * Rand();
+    theta = acos(1 - 2 * rand.x);
+    phi = 2.0 * PI * rand.y;
 }
 
 float3 LocalSpaceDirection(float theta, float phi)

@@ -23,8 +23,8 @@ float3 DisneyDiffuse(float3 albedo, half nv, half nl, half lh, half perceptualRo
 float3 DirectLightDiffuse(float3 albedo, float nv, float nl, float lh, float perceptualRoughness)
 {
 	float kd = 1;
-	//float3 diffColor = kd * LambertDiffuse(albedo);
-	float3 diffColor = kd * DisneyDiffuse(albedo, nv, nl, lh, perceptualRoughness);
+	float3 diffColor = kd * LambertDiffuse(albedo);
+	//float3 diffColor = kd * DisneyDiffuse(albedo, nv, nl, lh, perceptualRoughness);
 
 	return diffColor;
 }
@@ -62,10 +62,13 @@ float GeometrySmith(float nv, float nl, float roughness)
 	return ggx1 * ggx2;
 }
 
-float FresnelSchlick(float cosTheta, float3 f0)
+// aka FresnelLerp
+float FresnelSchlick(float3 f0, float3 f90, float cosTheta)
 {
 	//return f0 + (1.0 - f0) * exp2((-5.55473 * cosTheta - 6.98316) * cosTheta);
-	return f0 + (1.0 - f0) * pow(1.0 - cosTheta, 5.0);
+	//return f0 + (1.0 - f0) * pow(1.0 - cosTheta, 5.0);
+	float t = pow(1.0 - cosTheta, 5.0);
+	return lerp(f0, f90, t);
 }
 
 float3 DirectLightSpecular(float roughness, float nv, float nl, float nh, float vh, float3 f0, out float3 F)
@@ -73,8 +76,8 @@ float3 DirectLightSpecular(float roughness, float nv, float nl, float nh, float 
 	// https://github.com/EpicGames/UnrealEngine/blob/5ccd1d8b91c944d275d04395a037636837de2c56/Engine/Shaders/Private/BRDF.ush
     float D = TrowbridgeReitzGGX(nh, roughness);
     float G = GeometrySmith(nv, nl, roughness);
-	//F = FresnelSchlick(vh, f0);
-	F = FresnelSchlick(nh, f0);
+	//F = FresnelSchlick(f0, 1, vh);
+	F = FresnelSchlick(f0, 1, nh);
 
 	return D * G * F * 0.25 / (nv * nl);
 }
@@ -85,7 +88,8 @@ uniform float4 _SH9[9];
 
 float4 SH9(float3 dir)
 {
-    float3 d = float3(dir.x,dir.z,dir.y);
+	// The sample direction should match the method: void CalculateSH9(float theta, float phi, uint groupIndex)
+    float3 d = float3(dir.x, dir.z, dir.y);
     float4 color = 
     _SH9[0] * GetY00(d) + 
     _SH9[1] * GetY1n1(d) + 
@@ -116,13 +120,14 @@ float3 IndirectLightDiffuse(float3 albedo, float3 normal, float metallic, float3
 #endif
 	float3 ambient = 0.03 * albedo;
 	float3 iblDiffuse = (ambient + color) * kdLast * albedo;
-	//iblDiffuse = sh9Color;
 
 	return iblDiffuse;
 }
 //// IndirectLightDiffuse End
 
 //// IndirectLightSpecular Start
+
+
 float3 IndirectLightSpecular(float3 normal, float3 viewDir, float perceptualRoughness, float roughness, float nv, float3 fLast)
 {
 	float mipRoughness = perceptualRoughness * (1.7 - 0.7 * perceptualRoughness);
@@ -131,24 +136,42 @@ float3 IndirectLightSpecular(float3 normal, float3 viewDir, float perceptualRoug
 
 	//float4 rgbm = _Cubemap.SampleLevel(Sampler_PointClamp, reflectVec, 0);
 	float4 rgbm = texCUBElod(_CubeTex, float4(reflectVec, mip));
-	//float4 color = pow(rgbm.rgba, 2.2);
-	float4 color = rgbm.rgba;
-	float3 iblSpecular = color.rgb;
+//#if defined(_HDR)
+//	float3 color = LinearToGammaSpace(rgbm.rgb);
+//#else
+	//float3 color = rgbm.rgb;
+//#endif
+	float3 color = rgbm.rgb;
+
+	float3 iblSpecular = color;
 
 	float2 uv = float2(lerp(0, 0.99, nv), lerp(0, 0.99, roughness));
 	float2 envBDRF = tex2D(_BRDFTex, uv).rg;
 
 	float3 iblSpecularResult = iblSpecular * (fLast * envBDRF.r + envBDRF.g);
 	return iblSpecularResult;
-//	float4 rgbm = texCUBE(_Cubemap, float4(reflectVec, 0));
-//	//rgbm.rgb = DecodeHDR(rgbm, _Cubemap_HDR);
-//
-//	half alpha = _Cubemap_HDR.w * (rgbm.a - 1.0) + 1.0;
-//#   if defined(UNITY_USE_NATIVE_HDR)
-//	return _Cubemap_HDR.x * rgbm.rgb; // Multiplier for future HDRI relative to absolute conversion.
-//#   else
-//	return (_Cubemap_HDR.x * pow(alpha, _Cubemap_HDR.y)) * rgbm.rgb;
-//#   endif
-//	return rgbm.rgb;
+}
+
+// Unity doesn't sample the brdf lut texture
+float3 IndirectLightSpecular(float3 normal, float3 viewDir, float perceptualRoughness, float roughness, float nv, float f0, float f90)
+{
+	float mipRoughness = perceptualRoughness * (1.7 - 0.7 * perceptualRoughness);
+	float mip = mipRoughness * SpecCubeLodSteps;
+	float3 reflectVec = reflect(-viewDir, normal);
+
+	//float4 rgbm = _Cubemap.SampleLevel(Sampler_PointClamp, reflectVec, 0);
+	float4 rgbm = texCUBElod(_CubeTex, float4(reflectVec, mip));
+	//#if defined(_HDR)
+	//	float3 color = LinearToGammaSpace(rgbm.rgb);
+	//#else
+		//float3 color = rgbm.rgb;
+	//#endif
+	float3 color = rgbm.rgb;
+
+	float3 iblSpecular = color;
+
+	float surfaceReduction = 1.0 / (roughness * roughness + 1.0); // Liner color space
+	float3 iblSpecularResult = iblSpecular * surfaceReduction * FresnelSchlick(f0, f90, nv);
+	return iblSpecularResult;
 }
 //// IndirectLightSpecular End
