@@ -4,9 +4,10 @@ Shader "Custom/LitPBR"
 	{
 		_MainTex								("Albedo",				2D)				= "white" {}
 		_MetallicTex							("Metallic",			2D)				= "white" {}
-		_RoughnessTex							("Roughness",			2D)				= "white" {}
+		//_RoughnessTex							("Roughness",			2D)				= "white" {}
 		_RoughnessScale							("RoughnessScale",      Range(0, 1))	= 0
-		_NormalTex								("Normal",				2D)				= "bump" {}
+		[Gamma]_NormalTex								("Normal",				2D)				= "bump" {}
+		_AOTex									("AO",					2D)				= "white" {}
 		[HideInInspector] _CubeTex				("Reflection Cubemap",	Cube)			= "_Skybox" { }
 		[HideInInspector] _BRDFTex				("IBL Brdf LUT",		2D)				= "white" {}
 		// Blending state
@@ -35,6 +36,17 @@ Shader "Custom/LitPBR"
 			#pragma vertex vertForward
 			#pragma fragment fragForward
 			#pragma multi_compile __ _HDR
+			#pragma multi_compile __ _SHADED
+			#pragma multi_compile __ _ALBEDO
+			#pragma multi_compile __ _AO
+			#pragma multi_compile __ _NORMAL
+			#pragma multi_compile __ _METALLIC
+			#pragma multi_compile __ _ROUGHNESS
+			#pragma multi_compile __ _DIRECTLIGHTDIFFUSE
+			#pragma multi_compile __ _DIRECTLIGHTSPECULAR
+			#pragma multi_compile __ _INDIRECTLIGHTDIFFUSE
+			#pragma multi_compile __ _INDIRECTLIGHTSPECULAR
+			#pragma multi_compile __ _IBLENVIRONMENT
 
 			#include "UnityCG.cginc"
 			#include "SH9Common.hlsl"

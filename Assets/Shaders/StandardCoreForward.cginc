@@ -33,8 +33,8 @@ VertexOutputForward vertForward(VertexInput v)
     return o;
 }
 
-
 float3 BRDF(float3 albedo,
+    float3 ao,
     float3 normal,
     float metallic,
     float perceptualRoughness,
@@ -79,10 +79,17 @@ float3 BRDF(float3 albedo,
     // Unity way
     float3 indirectLightSpecular = IndirectLightSpecular(normal, viewDir, perceptualRoughness, roughness, nv, f0, f90);
 
-    float3 directLight = (kd * directLightDiffuse + directLightSpecular) * lightColor * nl * PI;
+    float3 directLight = (kd * directLightDiffuse * ao + directLightSpecular) * lightColor * nl * PI;
     float3 indirectLight = indirectLightDiffuse + indirectLightSpecular;
     float3 brdf = directLight + indirectLight;
     //brdf = indirectLightDiffuse;
+
+
+#if defined(_ALBEDO)
+    brdf = albedo;
+#elif defined(_NORMAL)
+    brdf = normal;
+#endif
 
     return brdf;
 }
@@ -106,16 +113,19 @@ float3 GetNormal(float2 uv, float4 tangentToWorld[3])
 float4 fragForward(VertexOutputForward i) : SV_Target
 {
     float3 albedo = tex2D(_MainTex, i.tex).rgb;
+    float3 ao = tex2D(_AOTex, i.tex).rgb;
     float3 normalWorld = GetNormal(i.tex, i.tangentToWorldAndPackedData);
-    float metallic = tex2D(_MetallicTex, i.tex).r;
+    float2 metallicAndPerceptualRoughness = tex2D(_MetallicTex, i.tex).ra;
+    float metallic = metallicAndPerceptualRoughness.x;
+    float perceptualRoughness = metallicAndPerceptualRoughness.y;
     //float perceptualRoughness = tex2D(_RoughnessTex, i.tex).r;
-    float perceptualRoughness = _RoughnessScale;
+    //float perceptualRoughness = _RoughnessScale;
     float3 eyeVec = normalize(i.eyeVec);
     float3 lightDir = -_DirectionalLightWorldSpace;
     float3 lightColor = GammaToLinearSpace(_DirectionalLightColor);
 
     float4 finalColor = 0;
-    finalColor.rgb = BRDF(albedo, normalWorld, metallic, perceptualRoughness, -eyeVec, lightDir, lightColor);
+    finalColor.rgb = BRDF(albedo, ao, normalWorld, metallic, perceptualRoughness, -eyeVec, lightDir, lightColor);
     finalColor.a = 1;
 
     return finalColor;

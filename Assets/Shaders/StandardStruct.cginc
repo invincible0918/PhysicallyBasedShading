@@ -10,6 +10,7 @@ float _RoughnessScale;
 sampler2D _MainTex;
 sampler2D _NormalTex;
 sampler2D _MetallicTex;
+sampler2D _AOTex;
 sampler2D _RoughnessTex;
 sampler2D _BRDFTex;
 samplerCUBE _CubeTex;

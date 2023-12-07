@@ -64,6 +64,7 @@ public class RenderFramework : MonoBehaviour
     {
         InitCamera();
         InitCubemap();
+        InitShader();
         //InitSphericalHarmonic();
 
         instance = this;
@@ -107,6 +108,11 @@ public class RenderFramework : MonoBehaviour
                 Debug.Log("Sh9 ReconstructorAsync is done!");
             });
         });
+    }
+
+    void InitShader()
+    {
+        Shader.EnableKeyword("_SHADED");
     }
 
     AsyncGPUReadbackRequest Sh9GeneratorAsync(Cubemap cubemap, bool isHDR, System.Action<Vector4[]> callback)
@@ -314,6 +320,48 @@ public class RenderFramework : MonoBehaviour
                 Shader.EnableKeyword("_HDR");
             else
                 Shader.DisableKeyword("_HDR");
+        }
+    }
+
+    // Interface for debug shading
+    enum ShaderChannel
+    {
+        Shaded = 0,
+        Albedo,
+        AO,
+        Normal,
+        Metallic,
+        Roughness,
+        DirectlightDiffuse,
+        DirectlightSpecular,
+        IndirectlightDiffuse,
+        IndirectlightSpecular,
+        IBLEnvironment
+    }
+
+    static readonly Dictionary<int, string> ShaderChannelMap = new Dictionary<int, string>
+    { 
+        {(int)ShaderChannel.Shaded, "_SHADED" },
+        {(int)ShaderChannel.Albedo, "_ALBEDO" },
+        {(int)ShaderChannel.AO, "_AO" },
+        {(int)ShaderChannel.Normal, "_NORMAL" },
+        {(int)ShaderChannel.Metallic, "_METALLIC" },
+        {(int)ShaderChannel.Roughness, "_ROUGHNESS" },
+        {(int)ShaderChannel.DirectlightDiffuse, "_DIRECTLIGHTDIFFUSE" },
+        {(int)ShaderChannel.DirectlightSpecular, "_DIRECTLIGHTSPECULAR" },
+        {(int)ShaderChannel.IndirectlightDiffuse, "_INDIRECTLIGHTDIFFUSE" },
+        {(int)ShaderChannel.IndirectlightSpecular, "_INDIRECTLIGHTSPECULAR" },
+        {(int)ShaderChannel.IBLEnvironment, "_IBLENVIRONMENT" }
+    };
+
+    public void DisplayShaderChannel(int channel)
+    {
+        foreach(KeyValuePair<int, string> kvp in ShaderChannelMap)
+        {
+            if (channel == kvp.Key)
+                Shader.EnableKeyword(kvp.Value);
+            else
+                Shader.DisableKeyword(kvp.Value);
         }
     }
 }
