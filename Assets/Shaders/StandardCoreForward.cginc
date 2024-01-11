@@ -7,6 +7,7 @@ float3x3 TangentToWorld(float3 normal, float3 tangent, float tangentSign)
     // float4 unity_WorldTransformParams; // w is usually 1.0, or -1.0 for odd-negative scale transforms
     float sign = tangentSign/* * unity_WorldTransformParams.w*/;
     float3 binormal = cross(normal, tangent) * sign;
+    binormal = normalize(binormal);
     return float3x3(tangent, binormal, normal);
 }
 
@@ -19,12 +20,13 @@ VertexOutputForward vertForward(VertexInput v)
     o.tangentToWorldAndPackedData[1].w = posWorld.y;
     o.tangentToWorldAndPackedData[2].w = posWorld.z;
     o.pos = mul(_ViewToProjection, mul(_ObjectToWorld, float4(v.vertex.xyz, 1.0)));
-    o.tex = v.uv0;
+    o.tex = v.uv0 * _MainTex_ST.xy + _MainTex_ST.zw;
     o.eyeVec.xyz = normalize(posWorld.xyz - _CameraWorldSpace);
     float3 normalWorld = mul((float3x3)_ObjectToWorld, v.normal);
     normalWorld = normalize(normalWorld);
 
     float4 tangentWorld = float4(mul((float3x3)_ObjectToWorld, v.tangent.xyz), v.tangent.w);
+    tangentWorld = normalize(tangentWorld);
     float3x3 tangentToWorld = TangentToWorld(normalWorld, tangentWorld.xyz, tangentWorld.w);
     o.tangentToWorldAndPackedData[0].xyz = tangentToWorld[0];
     o.tangentToWorldAndPackedData[1].xyz = tangentToWorld[1];
@@ -79,11 +81,9 @@ float3 BRDF(float3 albedo,
     // Unity way
     float3 indirectLightSpecular = IndirectLightSpecular(normal, viewDir, perceptualRoughness, roughness, nv, f0, f90);
 
-    float3 directLight = (kd * directLightDiffuse * ao + directLightSpecular) * lightColor * nl * PI;
+    float3 directLight = (kd * directLightDiffuse * ao + directLightSpecular)* lightColor* nl* PI;
     float3 indirectLight = indirectLightDiffuse + indirectLightSpecular;
     float3 brdf = directLight + indirectLight;
-    //brdf = indirectLightDiffuse;
-
 
 #if defined(_ALBEDO)
     brdf = albedo;
@@ -100,10 +100,12 @@ float3 GetNormal(float2 uv, float4 tangentToWorld[3])
     float3 binormal = tangentToWorld[1].xyz;
     float3 normal = tangentToWorld[2].xyz;
     
-    float3 normalTangent;
     float3 normalColor = tex2D(_NormalTex, uv).xyz;
+
+    float3 normalTangent;
+
     normalTangent = normalColor * 2 - 1;
-    //normalTangent.z = sqrt(1.0 - saturate(dot(normalTangent.xy, normalTangent.xy)));
+    normalTangent.z = sqrt(1.0 - saturate(dot(normalTangent.xy, normalTangent.xy)));
     
     float3 normalWorld = tangent * normalTangent.x + binormal * normalTangent.y + normal * normalTangent.z;
     
@@ -117,7 +119,7 @@ float4 fragForward(VertexOutputForward i) : SV_Target
     float3 normalWorld = GetNormal(i.tex, i.tangentToWorldAndPackedData);
     float2 metallicAndPerceptualRoughness = tex2D(_MetallicTex, i.tex).ra;
     float metallic = metallicAndPerceptualRoughness.x;
-    float perceptualRoughness = metallicAndPerceptualRoughness.y;
+    float perceptualRoughness = 1 - metallicAndPerceptualRoughness.y;
     //float perceptualRoughness = tex2D(_RoughnessTex, i.tex).r;
     //float perceptualRoughness = _RoughnessScale;
     float3 eyeVec = normalize(i.eyeVec);

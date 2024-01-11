@@ -111,7 +111,7 @@ Shader "Custom/Pitch"
                 float3 h = normalize(lightDir + viewDir);
 
                 float3 mowPattern = tex2D(_MowpatternTex, i.tex).xyz;
-                float3 mow = float3((mowPattern.xy * 2.0) - 1.0, 0.5);
+                float3 mow = float3(mowPattern.xy * 2.0 - 1.0, 0.5);
 
                 float mowFactor = dot(mow, h) * _Bumpiness;
 
@@ -127,7 +127,7 @@ Shader "Custom/Pitch"
                 finalColor.rgb *= noise;
 
                 finalColor.rgb *= _Multiple;
-
+                finalColor.rgb = mowPattern.y;
 
                 return finalColor;
             }

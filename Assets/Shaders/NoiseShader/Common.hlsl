@@ -1,64 +1,91 @@
-#ifndef _INCLUDE_JP_KEIJIRO_NOISESHADER_COMMON_HLSL_
-#define _INCLUDE_JP_KEIJIRO_NOISESHADER_COMMON_HLSL_
+#ifndef _PITCH_COMMON_
+#define _PITCH_COMMON_
 
-float wglnoise_mod(float x, float y)
-{
-    return x - y * floor(x / y);
-}
+const static float2 ANTI_ALIASING_OFFSETS16[16] = {
+    float2(-0.125, -0.125),
+    float2(0.125, -0.125),
+    float2(0.375, -0.125),
+    float2(0.625, -0.125),
+    float2(-0.125, 0.125),
+    float2(0.125, 0.125),
+    float2(0.375, 0.125),
+    float2(0.625, 0.125),
+    float2(-0.125, 0.375),
+    float2(0.125, 0.375),
+    float2(0.375, 0.375),
+    float2(0.625, 0.375),
+    float2(-0.125, 0.625),
+    float2(0.125, 0.625),
+    float2(0.375, 0.625),
+    float2(0.625, 0.625)
+};
 
-float2 wglnoise_mod(float2 x, float2 y)
-{
-    return x - y * floor(x / y);
-}
+const static float2 ANTI_ALIASING_OFFSETS64[64] = {
+    float2(-0.0625, -0.0625),
+    float2(0.0625, -0.0625),
+    float2(0.1875, -0.0625),
+    float2(0.3125, -0.0625),
+    float2(0.4375, -0.0625),
+    float2(0.5625, -0.0625),
+    float2(0.6875, -0.0625),
+    float2(0.8125, -0.0625),
+    float2(-0.0625, 0.0625),
+    float2(0.0625, 0.0625),
+    float2(0.1875, 0.0625),
+    float2(0.3125, 0.0625),
+    float2(0.4375, 0.0625),
+    float2(0.5625, 0.0625),
+    float2(0.6875, 0.0625),
+    float2(0.8125, 0.0625),
+    float2(-0.0625, 0.1875),
+    float2(0.0625, 0.1875),
+    float2(0.1875, 0.1875),
+    float2(0.3125, 0.1875),
+    float2(0.4375, 0.1875),
+    float2(0.5625, 0.1875),
+    float2(0.6875, 0.1875),
+    float2(0.8125, 0.1875),
+    float2(-0.0625, 0.3125),
+    float2(0.0625, 0.3125),
+    float2(0.1875, 0.3125),
+    float2(0.3125, 0.3125),
+    float2(0.4375, 0.3125),
+    float2(0.5625, 0.3125),
+    float2(0.6875, 0.3125),
+    float2(0.8125, 0.3125),
+    float2(-0.0625, 0.4375),
+    float2(0.0625, 0.4375),
+    float2(0.1875, 0.4375),
+    float2(0.3125, 0.4375),
+    float2(0.4375, 0.4375),
+    float2(0.5625, 0.4375),
+    float2(0.6875, 0.4375),
+    float2(0.8125, 0.4375),
+    float2(-0.0625, 0.5625),
+    float2(0.0625, 0.5625),
+    float2(0.1875, 0.5625),
+    float2(0.3125, 0.5625),
+    float2(0.4375, 0.5625),
+    float2(0.5625, 0.5625),
+    float2(0.6875, 0.5625),
+    float2(0.8125, 0.5625),
+    float2(-0.0625, 0.6875),
+    float2(0.0625, 0.6875),
+    float2(0.1875, 0.6875),
+    float2(0.3125, 0.6875),
+    float2(0.4375, 0.6875),
+    float2(0.5625, 0.6875),
+    float2(0.6875, 0.6875),
+    float2(0.8125, 0.6875),
+    float2(-0.0625, 0.8125),
+    float2(0.0625, 0.8125),
+    float2(0.1875, 0.8125),
+    float2(0.3125, 0.8125),
+    float2(0.4375, 0.8125),
+    float2(0.5625, 0.8125),
+    float2(0.6875, 0.8125),
+    float2(0.8125, 0.8125)
+};
 
-float3 wglnoise_mod(float3 x, float3 y)
-{
-    return x - y * floor(x / y);
-}
-
-float4 wglnoise_mod(float4 x, float4 y)
-{
-    return x - y * floor(x / y);
-}
-
-float2 wglnoise_fade(float2 t)
-{
-    return t * t * t * (t * (t * 6 - 15) + 10);
-}
-
-float3 wglnoise_fade(float3 t)
-{
-    return t * t * t * (t * (t * 6 - 15) + 10);
-}
-
-float wglnoise_mod289(float x)
-{
-    return x - floor(x / 289) * 289;
-}
-
-float2 wglnoise_mod289(float2 x)
-{
-    return x - floor(x / 289) * 289;
-}
-
-float3 wglnoise_mod289(float3 x)
-{
-    return x - floor(x / 289) * 289;
-}
-
-float4 wglnoise_mod289(float4 x)
-{
-    return x - floor(x / 289) * 289;
-}
-
-float3 wglnoise_permute(float3 x)
-{
-    return wglnoise_mod289((x * 34 + 1) * x);
-}
-
-float4 wglnoise_permute(float4 x)
-{
-    return wglnoise_mod289((x * 34 + 1) * x);
-}
 
 #endif

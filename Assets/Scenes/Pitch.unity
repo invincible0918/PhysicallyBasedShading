@@ -293,7 +293,7 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 574899966}
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0, y: 0, z: 24.1}
+  m_LocalPosition: {x: 0, y: 0, z: 19.5}
   m_LocalScale: {x: 50, y: 1, z: 50}
   m_ConstrainProportionsScale: 0
   m_Children:
@@ -312,6 +312,7 @@ GameObject:
   - component: {fileID: 661141874}
   - component: {fileID: 661141873}
   - component: {fileID: 661141872}
+  - component: {fileID: 661141875}
   m_Layer: 0
   m_Name: Pitch2
   m_TagString: Untagged
@@ -385,6 +386,19 @@ Transform:
   m_Father: {fileID: 0}
   m_RootOrder: 3
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &661141875
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 661141870}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: e7795e1d4ddde994f90f084c6f09bdaf, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  speed: 0.2
 --- !u!1 &821912450
 GameObject:
   m_ObjectHideFlags: 0
@@ -757,14 +771,14 @@ Transform:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1392390252}
-  m_LocalRotation: {x: 0.29609007, y: -0.6421298, z: 0.29609004, w: 0.64212984}
-  m_LocalPosition: {x: 53, y: 52.4, z: 0}
+  m_LocalRotation: {x: 0.15511583, y: -0.6898834, z: 0.15511581, w: 0.6898835}
+  m_LocalPosition: {x: 50.1, y: 18, z: -17.5}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 0}
   m_RootOrder: 1
-  m_LocalEulerAnglesHint: {x: 49.509, y: -90, z: 0}
+  m_LocalEulerAnglesHint: {x: 25.344, y: -90, z: 0}
 --- !u!1 &1412688224
 GameObject:
   m_ObjectHideFlags: 0

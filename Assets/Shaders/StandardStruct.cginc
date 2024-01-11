@@ -8,6 +8,8 @@ float3 _DirectionalLightColor;
 float _RoughnessScale;
 
 sampler2D _MainTex;
+float4 _MainTex_ST;
+
 sampler2D _NormalTex;
 sampler2D _MetallicTex;
 sampler2D _AOTex;

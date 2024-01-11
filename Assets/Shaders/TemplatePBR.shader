@@ -5,7 +5,7 @@
 		_MainTex				("Texture",			2D) = "white" {}
 		_Normal					("Normal",			2D) = "bump" {}
 		/*[Gamma] */_Metallic		("Metallic",		2D) = "black" {} //金属度要经过伽马校正
-		/*[Gamma] */_Roughness		("Roughness",		2D) = "black" {} //粗糙度要经过伽马校正
+		///*[Gamma] */_Roughness		("Roughness",		2D) = "black" {} //粗糙度要经过伽马校正
 		_LUT					("LUT",				2D) = "white" {}
     }
 
@@ -136,7 +136,7 @@
 				float3 halfVector = normalize(lightDir + viewDir);  //半角向量
 
 				float metallic = tex2D(_Metallic, i.uv).r;
-				float perceptualRoughness = tex2D(_Roughness, i.uv).r;
+				float perceptualRoughness = 1 - tex2D(_Metallic, i.uv).a;// tex2D(_Roughness, i.uv).r;
 
 				float roughness = perceptualRoughness * perceptualRoughness;
 				float squareRoughness = roughness * roughness;
@@ -195,7 +195,6 @@
 				float3 IndirectResult = iblDiffuseResult + iblSpecularResult;
 
 				float4 result = float4(DirectLightResult + IndirectResult, 1);
-				//result.rgb = iblDiffuseResult;
 
 				return result;
 			}
