@@ -35,15 +35,15 @@
 ![](Assets/Outputs/SH9.png)
 
 ## Generater SH9 and reconstruct the environment texture
-### Original HDR Texture
 <table>
+  <td>Original HDR Texture</td>
   <tr>
     <td><img src="Assets/Outputs/SH9_2.png" width=600></td>
     <td><img src="Assets/Outputs/SH9_0.png" width=600></td>
   </tr>
 </table>
-### Reconstructed HDR Texture
 <table>
+  <td>Reconstructed HDR Texture</td>
   <tr>
     <td><img src="Assets/Outputs/ReconstructSH9.png" width=600></td>
     <td><img src="Assets/Outputs/SH9_1.png" width=600></td>
