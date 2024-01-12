@@ -36,6 +36,16 @@
 
 ## Generater SH9 and reconstruct the environment texture
 ### Original HDR Texture
-![](Assets/Outputs/SH9_2.png)![](Assets/Outputs/SH9_0.png)
+<table>
+  <tr>
+    <td><img src="Assets/Outputs/SH9_2.png" width=600></td>
+    <td><img src="Assets/Outputs/SH9_0.png" width=600></td>
+  </tr>
+</table>
 ### Reconstructed HDR Texture
-![](Assets/Outputs/ReconstructSH9.png)![](Assets/Outputs/SH9_1.png)
+<table>
+  <tr>
+    <td><img src="Assets/Outputs/ReconstructSH9.png" width=600></td>
+    <td><img src="Assets/Outputs/SH9_1.png" width=600></td>
+  </tr>
+</table>
