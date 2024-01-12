@@ -110,7 +110,7 @@ float3 FresnelSchlickRoughness(float cosTheta, float3 F0, float roughness)
 	return F0 + (max(float3(1.0 - roughness, 1.0 - roughness, 1.0 - roughness), F0) - F0) * pow(1.0 - cosTheta, 5.0);
 }
 
-float3 IndirectLightDiffuse(float3 albedo, float3 normal, float metallic, float3 fLast)
+float3 IndirectLightDiffuse(float3 albedo, float3 normal, float metallic, float3 fLast, out float3 sh9)
 {
 	float3 kdLast = (1 - fLast) * (1 - metallic);
 
@@ -122,6 +122,8 @@ float3 IndirectLightDiffuse(float3 albedo, float3 normal, float metallic, float3
 #endif
 	float3 ambient = 0.03 * albedo;
 	float3 iblDiffuse = (ambient + color) * kdLast * albedo;
+
+	sh9 = color;
 
 	return iblDiffuse;
 }

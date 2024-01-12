@@ -364,4 +364,18 @@ public class RenderFramework : MonoBehaviour
                 Shader.DisableKeyword(kvp.Value);
         }
     }
+
+    [ContextMenu("Save SH9 Texture")]
+    void SaveSH9Texture()
+    {
+        Texture2D tex = new Texture2D(sh9Cubemap.width, sh9Cubemap.height, TextureFormat.RGBAFloat, false, true);
+        var oldRt = RenderTexture.active;
+        RenderTexture.active = sh9Cubemap;
+        tex.ReadPixels(new Rect(0, 0, sh9Cubemap.width, sh9Cubemap.height), 0, 0);
+        tex.Apply();
+        RenderTexture.active = oldRt;
+
+        System.IO.File.WriteAllBytes(Application.dataPath + "/Outputs/ReconstructSH9.png", tex.EncodeToPNG());
+        Object.DestroyImmediate(tex);
+    }
 }

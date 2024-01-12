@@ -74,7 +74,8 @@ float3 BRDF(float3 albedo,
 	float ks = f;
     float kd = (1 - ks) * (1 - metallic);
 
-    float3 indirectLightDiffuse = IndirectLightDiffuse(albedo, normal, metallic, fLast);
+    float3 sh9;
+    float3 indirectLightDiffuse = IndirectLightDiffuse(albedo, normal, metallic, fLast, /*out float3*/ sh9);
 
     // Unreal way
     //float3 indirectLightSpecular = IndirectLightSpecular(normal, viewDir, perceptualRoughness, roughness, nv, fLast);
@@ -87,8 +88,24 @@ float3 BRDF(float3 albedo,
 
 #if defined(_ALBEDO)
     brdf = albedo;
+#elif defined(_AO)
+    brdf = ao;
 #elif defined(_NORMAL)
     brdf = normal;
+#elif defined(_METALLIC)
+    brdf = metallic;
+#elif defined(_ROUGHNESS)
+    brdf = perceptualRoughness;
+#elif defined(_DIRECTLIGHTDIFFUSE)
+    brdf = directLightDiffuse;
+#elif defined(_DIRECTLIGHTSPECULAR)
+    brdf = directLightSpecular;
+#elif defined(_INDIRECTLIGHTDIFFUSE)
+    brdf = indirectLightDiffuse;
+#elif defined(_INDIRECTLIGHTSPECULAR)
+    brdf = indirectLightSpecular;
+#elif defined(_IBLENVIRONMENT)
+    brdf = sh9;
 #endif
 
     return brdf;
